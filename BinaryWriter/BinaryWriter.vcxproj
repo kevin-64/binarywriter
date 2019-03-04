@@ -119,6 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ConfigEntry.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="Field.h" />
     <ClInclude Include="FieldType.h" />
@@ -133,6 +134,7 @@
     <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConfigEntry.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="entry.cpp" />
     <ClCompile Include="Field.cpp" />
@@ -141,6 +143,9 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Type.cpp" />
     <ClCompile Include="Utilities.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="WorkTODO.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

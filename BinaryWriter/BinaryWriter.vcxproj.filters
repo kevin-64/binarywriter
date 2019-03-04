@@ -37,6 +37,9 @@
     <ClInclude Include="RecordType.h">
       <Filter>Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="ConfigEntry.h">
+      <Filter>Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Field.cpp">
@@ -61,6 +64,9 @@
     <ClCompile Include="Core.cpp">
       <Filter>Binary</Filter>
     </ClCompile>
+    <ClCompile Include="ConfigEntry.cpp">
+      <Filter>Primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Primitives">
@@ -75,5 +81,8 @@
     <Filter Include="Binary">
       <UniqueIdentifier>{40e03715-2bb8-4984-84ea-45066d19ad88}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="WorkTODO.txt" />
   </ItemGroup>
 </Project>
