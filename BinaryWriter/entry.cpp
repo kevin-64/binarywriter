@@ -16,7 +16,7 @@ using Core = KDB::Binary::Core;
 
 using namespace std::string_literals;
 
-void def();
+void writeDef(Core&);
 void readDef(Core&);
 
 int main()
@@ -25,8 +25,8 @@ int main()
 
 	Core core(R"(C:\Users\kevinik\Desktop\kdb_files.txt)");
 
-	//def();
-	readDef(core);
+	writeDef(core);
+	//readDef(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
@@ -43,7 +43,7 @@ int main()
 	return 0;
 }
 
-void def()
+void writeDef(Core& core)
 {
 	auto name("MyType"s);
 	auto fName("MyField"s);
@@ -52,8 +52,7 @@ void def()
 	auto typeId = Guid();
 	auto type = Type(name, std::move(fields), std::move(typeId));
 
-	auto fileWriter = FileWriter(R"(C:\Users\kevinik\Desktop\test_b.edb)");
-	fileWriter.writeRecord(type);
+	core.addType(type);
 }
 
 void readDef(Core& core)

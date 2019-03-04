@@ -57,9 +57,11 @@ namespace KDB::Binary
 		char recordType;
 		m_stream.read(&recordType, 1);
 
-		switch (recordType)
+		auto type = reinterpret_cast<unsigned char*>(&recordType);
+
+		switch (*type)
 		{
-			case 1:
+			case RecordType::TYPE_DEFINITION:
 				return buildType(m_stream);
 			//TODO: other types of record
 		}

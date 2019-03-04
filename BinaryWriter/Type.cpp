@@ -53,7 +53,7 @@ namespace KDB::Primitives
 	vector<char> Type::getData() const
 	{
 		vector<char> data;
-		data.push_back(1);
+		data.push_back(RecordType::TYPE_DEFINITION);
 
 		auto serGuid = m_typeId.serialize();
 		std::copy(begin(serGuid), end(serGuid), std::back_inserter(data));
@@ -91,6 +91,16 @@ namespace KDB::Primitives
 		}
 
 		return size;
+	}
+
+	std::string_view Type::getName() const
+	{
+		return this->m_name;
+	}
+
+	const KDB::Primitives::Field& Type::getField(int index) const
+	{
+		return this->m_fields[index];
 	}
 
 	std::unique_ptr<Type> buildType(std::fstream& stream)

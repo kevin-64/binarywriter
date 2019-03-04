@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IDBRecord.h"
+#include "RecordType.h"
 #include <string>
 #include <string_view>
 #include <iostream>

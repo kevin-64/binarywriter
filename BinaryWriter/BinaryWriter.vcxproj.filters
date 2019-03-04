@@ -31,6 +31,12 @@
     <ClInclude Include="core.h">
       <Filter>Binary</Filter>
     </ClInclude>
+    <ClInclude Include="IDBType.h">
+      <Filter>Contracts</Filter>
+    </ClInclude>
+    <ClInclude Include="RecordType.h">
+      <Filter>Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Field.cpp">
