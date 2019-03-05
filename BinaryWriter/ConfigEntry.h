@@ -14,6 +14,7 @@ namespace KDB::Primitives
 		ConfigEntry();
 		unsigned long long m_key;
 		std::vector<char> m_data;
+		int m_dataSize;
 		int m_size;
 
 	public:

@@ -3,6 +3,7 @@
 #include "FileWriter.h"
 #include "IDBRecord.h"
 #include "IDBType.h"
+#include "ConfigEntry.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -34,5 +35,8 @@ namespace KDB::Binary {
 		std::unique_ptr<KDB::Contracts::IDBRecord> getType(long long offset);
 
 		void addType(const KDB::Contracts::IDBType& type);
+
+		std::unique_ptr<KDB::Contracts::IDBRecord> getConfigEntry(long long offset);
+		void addConfigEntry(const KDB::Primitives::ConfigEntry& entry);
 	};
 }

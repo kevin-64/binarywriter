@@ -1,4 +1,5 @@
 #include "core.h"
+#include "shortcuts.h"
 #include <istream>
 #include <fstream>
 
@@ -106,8 +107,19 @@ namespace KDB::Binary
 		return m_typesFile->readRecord(offset);
 	}
 
+
 	void Core::addType(const KDB::Contracts::IDBType& type) 
 	{
 		m_typesFile->writeRecord(type);
+	}
+
+	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getConfigEntry(long long offset)
+	{
+		return m_configFile->readRecord(offset);
+	}
+
+	void Core::addConfigEntry(const KDB::Primitives::ConfigEntry& entry)
+	{
+		m_configFile->writeRecord(entry);
 	}
 }

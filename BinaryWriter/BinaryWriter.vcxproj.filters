@@ -40,6 +40,9 @@
     <ClInclude Include="ConfigEntry.h">
       <Filter>Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="ConfigKeys.h">
+      <Filter>Constants</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Field.cpp">
@@ -80,6 +83,9 @@
     </Filter>
     <Filter Include="Binary">
       <UniqueIdentifier>{40e03715-2bb8-4984-84ea-45066d19ad88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Constants">
+      <UniqueIdentifier>{c3cdebce-ceef-4cb8-95ea-01cb2493d0b3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

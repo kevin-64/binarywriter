@@ -2,12 +2,14 @@
 #include <iostream>
 #include <chrono>
 #include "core.h"
+#include "ConfigEntry.h"
 #include "Type.h"
 #include "Field.h"
 #include "FieldType.h"
 #include "shortcuts.h"
 #include "FileWriter.h"
 
+using ConfigEntry = KDB::Primitives::ConfigEntry;
 using Type = KDB::Primitives::Type;
 using Field = KDB::Primitives::Field;
 using FieldType = KDB::Primitives::FieldType;
@@ -19,13 +21,16 @@ using namespace std::string_literals;
 void writeDef(Core&);
 void readDef(Core&);
 
+void writeConf(Core&);
+
 int main()
 {
 	auto start = std::chrono::system_clock::now();
 
 	Core core(R"(C:\Users\kevinik\Desktop\kdb_files.txt)");
 
-	writeDef(core);
+	writeConf(core);
+	//writeDef(core);
 	//readDef(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -43,6 +48,17 @@ int main()
 	return 0;
 }
 
+void writeConf(Core& core)
+{
+	auto conf1 = ConfigEntry(1, 4);
+	auto conf2 = ConfigEntry(2, 2);
+	auto conf3 = ConfigEntry(3, 4);
+	
+	core.addConfigEntry(conf1);
+	core.addConfigEntry(conf2);
+	core.addConfigEntry(conf3);
+}
+
 void writeDef(Core& core)
 {
 	auto name("MyType"s);
@@ -58,4 +74,9 @@ void writeDef(Core& core)
 void readDef(Core& core)
 {
 	auto record = core.getType(0);
+}
+
+void readConf(Core& core)
+{
+	auto record = core.getConfigEntry(0);
 }

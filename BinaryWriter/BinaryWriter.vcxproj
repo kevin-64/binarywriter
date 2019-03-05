@@ -120,6 +120,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ConfigEntry.h" />
+    <ClInclude Include="ConfigKeys.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="Field.h" />
     <ClInclude Include="FieldType.h" />
