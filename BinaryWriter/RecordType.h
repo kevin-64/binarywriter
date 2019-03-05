@@ -14,9 +14,8 @@ namespace KDB::Primitives
 		ADDRESS_ENTRY = 0x05,
 		BULK_ENTRY = 0x06,
 
-		//config records
-		CONFIG_MASTER = 0xF0,
-		CONFIG_ENTRY = 0xF1,
+		//configuration records
+		CONFIG_RECORD = 0xF0,
 		
 		//special records
 		END_OF_FILE = 0xFE,

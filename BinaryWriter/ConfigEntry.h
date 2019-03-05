@@ -12,16 +12,17 @@ namespace KDB::Primitives
 	{
 	private:
 		ConfigEntry();
-		unsigned int m_key;
+		unsigned long long m_key;
 		std::vector<char> m_data;
 		int m_size;
 
 	public:
-		ConfigEntry(unsigned int key, int data);
-		ConfigEntry(unsigned int key, std::string data);
+		ConfigEntry(unsigned long long key, int data);
+		ConfigEntry(unsigned long long key, const std::string& data);
+		ConfigEntry(unsigned long long key, std::vector<char>&& data);
 		virtual ~ConfigEntry() = default;
 
-		friend void swapType(ConfigEntry& lhs, ConfigEntry& rhs) noexcept;
+		friend void swapConfigEntry(ConfigEntry& lhs, ConfigEntry& rhs) noexcept;
 
 		//move semantics are supported
 		ConfigEntry(ConfigEntry&& other) noexcept;

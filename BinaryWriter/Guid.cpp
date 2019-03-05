@@ -1,5 +1,6 @@
 #include "guid.h"
 #include "shortcuts.h"
+#include "Utilities.h"
 
 #include <sstream>
 
@@ -55,16 +56,11 @@ unique_ptr<string> Guid::toString() const
 vector<char> Guid::serialize() const
 {
 	vector<char> v;
-	v.push_back(static_cast<char>(m_guid.Data1 & 0x000000FF));
-	v.push_back(static_cast<char>((m_guid.Data1 & 0x0000FF00) >> 8));
-	v.push_back(static_cast<char>((m_guid.Data1 & 0x00FF0000) >> 16));
-	v.push_back(static_cast<char>((m_guid.Data1 & 0xFF000000) >> 24));
+	
+	KDB::Utilities::push_ulong(v, m_guid.Data1);
 
-	v.push_back(static_cast<char>(m_guid.Data2 & 0x00FF));
-	v.push_back(static_cast<char>((m_guid.Data2 & 0xFF00) >> 8));
-
-	v.push_back(static_cast<char>(m_guid.Data3 & 0x00FF));
-	v.push_back(static_cast<char>((m_guid.Data3 & 0xFF00) >> 8));
+	KDB::Utilities::push_ushort(v, m_guid.Data2);
+	KDB::Utilities::push_ushort(v, m_guid.Data3);
 
 	v.push_back(m_guid.Data4[0]);
 	v.push_back(m_guid.Data4[1]);

@@ -1,6 +1,7 @@
 #include "FileWriter.h"
 #include "Field.h"
 #include "Type.h"
+#include "ConfigEntry.h"
 #include "shortcuts.h"
 
 namespace KDB::Binary
@@ -63,7 +64,9 @@ namespace KDB::Binary
 		{
 			case RecordType::TYPE_DEFINITION:
 				return buildType(m_stream);
-			//TODO: other types of record
+			case RecordType::CONFIG_RECORD:
+				return buildConfigEntry(m_stream);
+			//TODO: altri tipi di record
 		}
 	}
 }

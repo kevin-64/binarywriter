@@ -53,22 +53,26 @@ namespace KDB::Primitives
 	vector<char> Type::getData() const
 	{
 		vector<char> data;
+
+//disabilitiamo gli warning per il troncamento
+#pragma warning( disable : 4305 4309)
 		data.push_back(RecordType::TYPE_DEFINITION);
 
 		auto serGuid = m_typeId.serialize();
-		std::copy(begin(serGuid), end(serGuid), std::back_inserter(data));
-		data.push_back(static_cast<char>(this->m_name.size()));
-		std::copy(begin(this->m_name), end(this->m_name), std::back_inserter(data));
+		Utilities::push_vector(data, serGuid);
+		Utilities::push_char(data, static_cast<char>(this->m_name.size()));
+
+		Utilities::push_string(data, this->m_name);
 		
-		data.push_back(static_cast<char>(this->m_fields.size()));
+		Utilities::push_char(data, static_cast<char>(this->m_fields.size()));
 		for (auto&& f : this->m_fields)
 		{
 			auto signature = f.getFieldSignature();
 
-			data.push_back(static_cast<char>(signature.first.length()));
-			std::copy(begin(signature.first), end(signature.first), std::back_inserter(data));
+			Utilities::push_char(data, static_cast<char>(signature.first.length()));
+			Utilities::push_stringview(data, signature.first);
 
-			data.push_back(signature.second);
+			Utilities::push_char(data, static_cast<char>(signature.second));
 		}
 
 		return data;
@@ -106,16 +110,10 @@ namespace KDB::Primitives
 	std::unique_ptr<Type> buildType(std::fstream& stream)
 	{
 		GUID guid;
-		stream.read(&reinterpret_cast<char*>(&(guid.Data1))[0], 1);
-		stream.read(&reinterpret_cast<char*>(&(guid.Data1))[1], 1);
-		stream.read(&reinterpret_cast<char*>(&(guid.Data1))[2], 1);
-		stream.read(&reinterpret_cast<char*>(&(guid.Data1))[3], 1);
+		Utilities::read_ulong(stream, &(guid.Data1));
 
-		stream.read(&reinterpret_cast<char*>(&(guid.Data2))[0], 1);
-		stream.read(&reinterpret_cast<char*>(&(guid.Data2))[1], 1);
-
-		stream.read(&reinterpret_cast<char*>(&(guid.Data3))[0], 1);
-		stream.read(&reinterpret_cast<char*>(&(guid.Data3))[1], 1);
+		Utilities::read_ushort(stream, &(guid.Data2));
+		Utilities::read_ushort(stream, &(guid.Data3));
 
 		stream.read(reinterpret_cast<char*>(&(guid.Data4)), 8);
 

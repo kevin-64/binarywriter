@@ -20,3 +20,5 @@ template <typename TKey, typename TValue>
 using map = std::map<TKey, TValue>;
 
 using ios = std::ios;
+
+using int64 = unsigned long long;
