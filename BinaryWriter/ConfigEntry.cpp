@@ -31,8 +31,9 @@ namespace KDB::Primitives
 	}
 
 	ConfigEntry::ConfigEntry(int64 key, std::vector<char>&& data)
-		: m_key(key), m_dataSize(data.size()), m_data(std::move(data))
+		: m_key(key), m_data(std::move(data)), m_size(0)
 	{
+		m_dataSize = m_data.size();
 	}
 
 	ConfigEntry::ConfigEntry(ConfigEntry&& other) noexcept
@@ -82,6 +83,11 @@ namespace KDB::Primitives
 		size += this->m_dataSize;						//size of the data for this entry
 
 		return size;
+	}
+
+	int ConfigEntry::getIntValue()
+	{
+		return *reinterpret_cast<int*>(this->m_data.data());
 	}
 
 	std::unique_ptr<ConfigEntry> buildConfigEntry(std::fstream& stream)

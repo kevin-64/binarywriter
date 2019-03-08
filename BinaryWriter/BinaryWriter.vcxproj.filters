@@ -49,6 +49,12 @@
     <ClInclude Include="PointerFormat.h">
       <Filter>Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="IDBPointer.h">
+      <Filter>Contracts</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigSettings.h">
+      <Filter>Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Field.cpp">

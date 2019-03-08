@@ -121,11 +121,13 @@
   <ItemGroup>
     <ClInclude Include="ConfigEntry.h" />
     <ClInclude Include="ConfigKeys.h" />
+    <ClInclude Include="ConfigSettings.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="Field.h" />
     <ClInclude Include="FieldType.h" />
     <ClInclude Include="FileWriter.h" />
     <ClInclude Include="guid.h" />
+    <ClInclude Include="IDBPointer.h" />
     <ClInclude Include="IDBRecord.h" />
     <ClInclude Include="IDBType.h" />
     <ClInclude Include="Object.h" />

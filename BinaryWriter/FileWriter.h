@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IDBRecord.h"
+#include "ConfigSettings.h"
 #include "RecordType.h"
 #include <string>
 #include <string_view>
@@ -12,11 +13,12 @@ namespace KDB::Binary
 	class FileWriter
 	{
 	private:
+		KDB::Primitives::ConfigSettings* m_settings;
 		std::string m_fileName;
 		std::fstream m_stream;
 		FileWriter() = default;
 	public:
-		explicit FileWriter(std::string_view filename);
+		FileWriter(KDB::Primitives::ConfigSettings* settings, std::string_view filename);
 		virtual ~FileWriter();
 
 		FileWriter(const FileWriter&) = delete;

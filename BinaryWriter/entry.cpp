@@ -29,9 +29,9 @@ int main()
 
 	Core core(R"(C:\Users\kevinik\Desktop\kdb_files.txt)");
 
-	writeConf(core);
+	//writeConf(core);
 	//writeDef(core);
-	//readDef(core);
+	readDef(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();

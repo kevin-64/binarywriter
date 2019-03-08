@@ -7,6 +7,9 @@ using ios = std::ios;
 
 namespace KDB::Binary
 {
+
+	#pragma region IDs
+
 	//IDs used to identify types of files to read
 	const std::string KDBCONF_ID = "kdbconfg";
 	const std::string TYPEDEF_ID = "ktypedef";
@@ -15,6 +18,8 @@ namespace KDB::Binary
 	const std::string INDEXES_ID = "ki";
 	const std::string DIARYOO_ID = "kdbdoops";
 	const std::string VOLATIL_ID = "kdbvolat";
+
+	#pragma endregion
 
 	Core::Core(const std::string& definitionFilePath)
 		: m_configFile(nullptr), m_typesFile(nullptr), m_ptrFile(nullptr), m_diaryFile(nullptr), m_tempFile(nullptr)
@@ -35,37 +40,40 @@ namespace KDB::Binary
 			if (start == STORAGE_ID)
 			{
 				initStatus |= 1;
-				m_storageFiles.emplace_back(actual);
+				m_storageFiles.emplace_back(&m_settings, actual);
 			}
 			else if (start == INDEXES_ID)
 			{
 				initStatus |= (1 << 1);
-				m_indexFiles.emplace_back(actual);
+				m_indexFiles.emplace_back(&m_settings, actual);
 			}
 			else if (key == TYPEDEF_ID)
 			{
 				initStatus |= (1 << 2);
-				m_typesFile = new FileWriter(actual);
+				m_typesFile = new FileWriter(&m_settings, actual);
 			}
 			else if (key == KDBCONF_ID)
 			{
 				initStatus |= (1 << 3);
-				m_configFile = new FileWriter(actual);
+				m_configFile = new FileWriter(&m_settings, actual);
+
+				//we read the static part of the database configuration
+				readConfiguration();
 			}
 			else if (key == PTRTABL_ID)
 			{
 				initStatus |= (1 << 4);
-				m_ptrFile = new FileWriter(actual);
+				m_ptrFile = new FileWriter(&m_settings, actual);
 			}
 			else if (key == DIARYOO_ID)
 			{
 				initStatus |= (1 << 5);
-				m_diaryFile = new FileWriter(actual);
+				m_diaryFile = new FileWriter(&m_settings, actual);
 			}
 			else if (key == VOLATIL_ID)
 			{
 				initStatus |= (1 << 6);
-				m_tempFile = new FileWriter(actual);
+				m_tempFile = new FileWriter(&m_settings, actual);
 			}
 			else 
 			{
@@ -107,7 +115,6 @@ namespace KDB::Binary
 		return m_typesFile->readRecord(offset);
 	}
 
-
 	void Core::addType(const KDB::Contracts::IDBType& type) 
 	{
 		m_typesFile->writeRecord(type);
@@ -121,5 +128,34 @@ namespace KDB::Binary
 	void Core::addConfigEntry(const KDB::Primitives::ConfigEntry& entry)
 	{
 		m_configFile->writeRecord(entry);
+	}
+
+	void Core::addPointer(const KDB::Primitives::Pointer& ptr)
+	{
+		m_ptrFile->writeRecord(ptr);
+	}
+
+	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getPointer(long long offset)
+	{
+		return m_ptrFile->readRecord(offset);
+	}
+	
+	void Core::readConfiguration()
+	{
+		auto offset = 0;
+
+		auto record = m_configFile->readRecord(offset);
+		auto cfgEntry = dynamic_cast<KDB::Primitives::ConfigEntry*>(record.get());
+		m_settings.PointerFormat.AddressSize = cfgEntry->getIntValue();
+		offset += cfgEntry->getSize();
+
+		record = m_configFile->readRecord(offset);
+		cfgEntry = dynamic_cast<KDB::Primitives::ConfigEntry*>(record.get());
+		m_settings.PointerFormat.BlockIdSize = cfgEntry->getIntValue();
+		offset += cfgEntry->getSize();
+
+		record = m_configFile->readRecord(offset);
+		cfgEntry = dynamic_cast<KDB::Primitives::ConfigEntry*>(record.get());
+		m_settings.PointerFormat.OffsetSize = cfgEntry->getIntValue();
 	}
 }

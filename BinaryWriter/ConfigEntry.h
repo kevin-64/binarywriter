@@ -36,6 +36,8 @@ namespace KDB::Primitives
 		virtual std::vector<char> getData() const override;
 		virtual int getSize() const override;
 
+		int getIntValue();
+
 		friend std::unique_ptr<ConfigEntry> buildConfigEntry(std::fstream& stream);
 	};
 

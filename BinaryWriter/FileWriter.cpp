@@ -1,18 +1,20 @@
 #include "FileWriter.h"
+#include "ConfigSettings.h"
 #include "Field.h"
 #include "Type.h"
 #include "ConfigEntry.h"
+#include "Pointer.h"
 #include "shortcuts.h"
 
 namespace KDB::Binary
 {
 	using namespace KDB::Primitives;
 
-	extern std::unique_ptr<Type> KDB::Primitives::buildType(std::fstream& stream);
+	//extern std::unique_ptr<Type> KDB::Primitives::buildType(std::fstream& stream);
 	using namespace Contracts;
 
-	FileWriter::FileWriter(std::string_view filename)
-		: m_fileName(filename)
+	FileWriter::FileWriter(KDB::Primitives::ConfigSettings* settings, std::string_view filename)
+		: m_settings(settings), m_fileName(filename)
 	{
 		//we open the file in the ctor and it will stay open for the lifetime of the class for performance reasons
 		m_stream.open(m_fileName.c_str(), ios::binary | ios::in | ios::out | ios::app);
@@ -27,6 +29,7 @@ namespace KDB::Binary
 	{
 		std::swap(lhs.m_fileName, rhs.m_fileName);
 		std::swap(lhs.m_stream, rhs.m_stream);
+		std::swap(lhs.m_settings, rhs.m_settings);
 	}
 
 	FileWriter::FileWriter(FileWriter&& other) noexcept
@@ -66,6 +69,8 @@ namespace KDB::Binary
 				return buildType(m_stream);
 			case RecordType::CONFIG_RECORD:
 				return buildConfigEntry(m_stream);
+			case RecordType::POINTER_RECORD:
+				return buildPointer(m_stream, m_settings->PointerFormat);
 			//TODO: altri tipi di record
 		}
 	}

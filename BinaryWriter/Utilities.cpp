@@ -86,35 +86,35 @@ namespace KDB::Utilities
 
 	void read_int64(std::fstream& stream, int64* value)
 	{
-		stream.read(&reinterpret_cast<char*>(&value)[0], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[1], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[2], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[3], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[4], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[5], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[6], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[7], 1);
+		stream.read(&reinterpret_cast<char*>(value)[0], 1);
+		stream.read(&reinterpret_cast<char*>(value)[1], 1);
+		stream.read(&reinterpret_cast<char*>(value)[2], 1);
+		stream.read(&reinterpret_cast<char*>(value)[3], 1);
+		stream.read(&reinterpret_cast<char*>(value)[4], 1);
+		stream.read(&reinterpret_cast<char*>(value)[5], 1);
+		stream.read(&reinterpret_cast<char*>(value)[6], 1);
+		stream.read(&reinterpret_cast<char*>(value)[7], 1);
 	}
 
 	void read_ulong(std::fstream& stream, unsigned long* value)
 	{
-		stream.read(&reinterpret_cast<char*>(&value)[0], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[1], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[2], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[3], 1);
+		stream.read(&reinterpret_cast<char*>(value)[0], 1);
+		stream.read(&reinterpret_cast<char*>(value)[1], 1);
+		stream.read(&reinterpret_cast<char*>(value)[2], 1);
+		stream.read(&reinterpret_cast<char*>(value)[3], 1);
 	}
 
 	void read_ushort(std::fstream& stream, unsigned short* value)
 	{
-		stream.read(&reinterpret_cast<char*>(&value)[0], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[1], 1);
+		stream.read(&reinterpret_cast<char*>(value)[0], 1);
+		stream.read(&reinterpret_cast<char*>(value)[1], 1);
 	}
 
 	void read_int(std::fstream& stream, int* value)
 	{
-		stream.read(&reinterpret_cast<char*>(&value)[0], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[1], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[2], 1);
-		stream.read(&reinterpret_cast<char*>(&value)[3], 1);
+		stream.read(&reinterpret_cast<char*>(value)[0], 1);
+		stream.read(&reinterpret_cast<char*>(value)[1], 1);
+		stream.read(&reinterpret_cast<char*>(value)[2], 1);
+		stream.read(&reinterpret_cast<char*>(value)[3], 1);
 	}
 }
