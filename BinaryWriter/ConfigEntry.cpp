@@ -52,7 +52,7 @@ namespace KDB::Primitives
 	}
 
 	/* Format of a "ConfigEntry" record:
-	 * 0:	     Type record identifier (0xF0)
+	 * 0:	     ConfigEntry record identifier (0xF0)
 	 * 1-8:      Configuration key: this is used to distinguish settings
 	 * 9-12:	 Size of the actual configuration data (S)
 	 * 13-S+13   Configuration value; its format is decided for each individual setting

@@ -5,6 +5,21 @@
 
 namespace KDB::Utilities
 {
+	void push_varint(std::vector<char>& vec, unsigned long long value, char size)
+	{
+		switch (size) {
+		case 4:
+			push_int(vec, value);
+			break;
+		case 8:
+			push_int64(vec, value);
+			break;
+		case 2:
+			push_ushort(vec, value);
+			break;
+		}
+	}
+
 	void push_ushort(vector<char>& vec, unsigned short value)
 	{
 		vec.push_back(static_cast<char>(value & 0x00FF));
@@ -52,6 +67,21 @@ namespace KDB::Utilities
 	void push_vector(vector<char>& vec, const std::vector<char>& value)
 	{
 		std::copy(begin(value), end(value), std::back_inserter(vec));
+	}
+
+	void read_varint(std::fstream& stream, unsigned long long* value, char size)
+	{
+		switch (size) {
+		case 4:
+			read_int(stream, reinterpret_cast<int*>(value));
+			break;
+		case 8:
+			read_int64(stream, value);
+			break;
+		case 2:
+			read_ushort(stream, reinterpret_cast<unsigned short*>(value));
+			break;
+		}
 	}
 
 	void read_int64(std::fstream& stream, int64* value)

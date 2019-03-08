@@ -11,8 +11,10 @@ namespace KDB::Primitives
 		MAIN_RECORD = 0x02,
 		EMBEDDED_RECORD = 0x03,
 		REMOTE_RECORD = 0x04,
-		ADDRESS_ENTRY = 0x05,
-		BULK_ENTRY = 0x06,
+		BULK_ENTRY = 0x05,
+
+		//addressing records
+		POINTER_RECORD = 0xA0,
 
 		//configuration records
 		CONFIG_RECORD = 0xF0,
