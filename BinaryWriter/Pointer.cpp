@@ -20,8 +20,9 @@ namespace KDB::Primitives
 	}
 
 	Pointer::Pointer(PointerFormat format, int64 address, int64 blockId, int64 offset)
-		: m_format(format), m_address(address), m_blockId(blockId), m_offset(offset)
+		: m_size(0), m_format(format), m_address(address), m_blockId(blockId), m_offset(offset)
 	{
+		this->m_size = getSize();
 	}
 
 	Pointer::Pointer(Pointer&& other) noexcept

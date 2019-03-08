@@ -19,19 +19,19 @@ namespace KDB::Primitives
 	}
 
 	ConfigEntry::ConfigEntry(int64 key, int data)
-		: m_key(key), m_dataSize(sizeof(int))
+		: m_size(0), m_key(key), m_dataSize(sizeof(int))
 	{
 		Utilities::push_int(m_data, data);
 	}
 
 	ConfigEntry::ConfigEntry(int64 key, const std::string& data)
-		: m_key(key), m_dataSize(data.length())
+		: m_size(0), m_key(key), m_dataSize(data.length())
 	{
 		Utilities::push_string(m_data, data);
 	}
 
 	ConfigEntry::ConfigEntry(int64 key, std::vector<char>&& data)
-		: m_key(key), m_data(std::move(data)), m_size(0)
+		: m_size(0), m_key(key), m_data(std::move(data))
 	{
 		m_dataSize = m_data.size();
 	}

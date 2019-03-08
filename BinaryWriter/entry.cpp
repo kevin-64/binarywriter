@@ -23,6 +23,9 @@ void readDef(Core&);
 
 void writeConf(Core&);
 
+void writePtr(Core&);
+void readPtr(Core&);
+
 int main()
 {
 	auto start = std::chrono::system_clock::now();
@@ -31,7 +34,9 @@ int main()
 
 	//writeConf(core);
 	//writeDef(core);
-	readDef(core);
+	//readDef(core);
+	//writePtr(core);
+	//readPtr(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
@@ -79,4 +84,16 @@ void readDef(Core& core)
 void readConf(Core& core)
 {
 	auto record = core.getConfigEntry(0);
+}
+
+void writePtr(Core& core)
+{
+	auto fmt = KDB::Primitives::PointerFormat{ 4, 2, 4 };
+	auto ptr = KDB::Primitives::Pointer(fmt, 0xFFFFEEEE, 0xAABB, 0x11223344);
+	core.addPointer(ptr);
+}
+
+void readPtr(Core& core)
+{
+	auto record = core.getPointer(0);
 }

@@ -71,17 +71,24 @@ namespace KDB::Utilities
 
 	void read_varint(std::fstream& stream, unsigned long long* value, char size)
 	{
-		switch (size) {
-		case 4:
-			read_int(stream, reinterpret_cast<int*>(value));
-			break;
-		case 8:
-			read_int64(stream, value);
-			break;
-		case 2:
-			read_ushort(stream, reinterpret_cast<unsigned short*>(value));
-			break;
-		}
+		*value = 0; //blank all bytes first
+
+		stream.read(&reinterpret_cast<char*>(value)[0], 1);
+		stream.read(&reinterpret_cast<char*>(value)[1], 1);
+
+		if (size == 2)
+			return;
+
+		stream.read(&reinterpret_cast<char*>(value)[2], 1);
+		stream.read(&reinterpret_cast<char*>(value)[3], 1);
+
+		if (size == 4)
+			return;
+
+		stream.read(&reinterpret_cast<char*>(value)[4], 1);
+		stream.read(&reinterpret_cast<char*>(value)[5], 1);
+		stream.read(&reinterpret_cast<char*>(value)[6], 1);
+		stream.read(&reinterpret_cast<char*>(value)[7], 1);
 	}
 
 	void read_int64(std::fstream& stream, int64* value)

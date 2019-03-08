@@ -18,7 +18,7 @@ namespace KDB::Primitives
 	}
 
 	Type::Type(string name, vector<Field>&& fields, Guid&& guid)
-		: m_name(std::move(name)), m_fields(std::move(fields)), m_typeId(std::move(guid))
+		: m_size(0), m_name(std::move(name)), m_fields(std::move(fields)), m_typeId(std::move(guid))
 	{
 		m_size = getSize();
 	}
