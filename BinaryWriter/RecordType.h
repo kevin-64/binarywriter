@@ -3,9 +3,7 @@
 namespace KDB::Primitives
 {
 	enum RecordType
-	{
-		BLOCK_START = 0x00,
-	
+	{	
 		//standard records
 		TYPE_DEFINITION = 0x01,
 		MAIN_RECORD = 0x02,
@@ -15,6 +13,10 @@ namespace KDB::Primitives
 
 		//addressing records
 		POINTER_RECORD = 0xA0,
+
+		//block definition records
+		BLOCK_DEFINITION = 0xB0,
+		BLOCK_PARTITION = 0xB1,
 
 		//configuration records
 		CONFIG_RECORD = 0xF0,

@@ -19,6 +19,7 @@ namespace KDB::Binary {
 		FileWriter* m_configFile;
 		FileWriter* m_typesFile;
 		FileWriter* m_ptrFile;
+		FileWriter* m_blocksFile;
 		FileWriter* m_diaryFile;
 		FileWriter* m_tempFile;
 

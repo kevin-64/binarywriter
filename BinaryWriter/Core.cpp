@@ -13,6 +13,7 @@ namespace KDB::Binary
 	//IDs used to identify types of files to read
 	const std::string KDBCONF_ID = "kdbconfg";
 	const std::string TYPEDEF_ID = "ktypedef";
+	const std::string BLOCDEF_ID = "kblocksf";
 	const std::string STORAGE_ID = "ks";
 	const std::string PTRTABL_ID = "kptrtblf";
 	const std::string INDEXES_ID = "ki";
@@ -26,7 +27,7 @@ namespace KDB::Binary
 	{
 		std::ifstream definitionFile(definitionFilePath);
 
-		unsigned char initStatus = 0x80; //just the MSB is set here, as there are 7 bits in our check mask
+		unsigned char initStatus = 0;
 		std::string current;
 
 		while (!definitionFile.eof())
@@ -65,14 +66,19 @@ namespace KDB::Binary
 				initStatus |= (1 << 4);
 				m_ptrFile = new FileWriter(&m_settings, actual);
 			}
-			else if (key == DIARYOO_ID)
+			else if (key == BLOCDEF_ID)
 			{
 				initStatus |= (1 << 5);
+				m_blocksFile = new FileWriter(&m_settings, actual);
+			}
+			else if (key == DIARYOO_ID)
+			{
+				initStatus |= (1 << 6);
 				m_diaryFile = new FileWriter(&m_settings, actual);
 			}
 			else if (key == VOLATIL_ID)
 			{
-				initStatus |= (1 << 6);
+				initStatus |= (1 << 7);
 				m_tempFile = new FileWriter(&m_settings, actual);
 			}
 			else 
