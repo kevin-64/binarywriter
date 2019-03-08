@@ -69,6 +69,21 @@ namespace KDB::Utilities
 		std::copy(begin(value), end(value), std::back_inserter(vec));
 	}
 
+	void read_GUID(std::fstream& stream, GUID* value)
+	{
+		read_ulong(stream, &(value->Data1));
+
+		read_ushort(stream, &(value->Data2));
+		read_ushort(stream, &(value->Data3));
+
+		stream.read(reinterpret_cast<char*>(&(value->Data4)), 8);
+	}
+
+	void read_char(std::fstream& stream, char* value)
+	{
+		stream.read(value, 1);
+	}
+
 	void read_varint(std::fstream& stream, unsigned long long* value, char size)
 	{
 		*value = 0; //blank all bytes first

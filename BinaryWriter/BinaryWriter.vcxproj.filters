@@ -55,6 +55,12 @@
     <ClInclude Include="ConfigSettings.h">
       <Filter>Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="BlockDefinition.h">
+      <Filter>Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="PartitionDefinition.h">
+      <Filter>Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Field.cpp">
@@ -83,6 +89,12 @@
       <Filter>Primitives</Filter>
     </ClCompile>
     <ClCompile Include="Pointer.cpp">
+      <Filter>Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="PartitionDefinition.cpp">
+      <Filter>Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockDefinition.cpp">
       <Filter>Primitives</Filter>
     </ClCompile>
   </ItemGroup>

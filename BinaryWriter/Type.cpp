@@ -110,12 +110,7 @@ namespace KDB::Primitives
 	std::unique_ptr<Type> buildType(std::fstream& stream)
 	{
 		GUID guid;
-		Utilities::read_ulong(stream, &(guid.Data1));
-
-		Utilities::read_ushort(stream, &(guid.Data2));
-		Utilities::read_ushort(stream, &(guid.Data3));
-
-		stream.read(reinterpret_cast<char*>(&(guid.Data4)), 8);
+		Utilities::read_GUID(stream, &guid);
 
 		Guid g(std::move(guid));
 

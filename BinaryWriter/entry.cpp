@@ -34,7 +34,7 @@ int main()
 
 	//writeConf(core);
 	//writeDef(core);
-	//readDef(core);
+	readDef(core);
 	//writePtr(core);
 	//readPtr(core);
 	auto end = std::chrono::system_clock::now();

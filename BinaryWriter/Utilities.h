@@ -1,4 +1,5 @@
 #pragma once
+#include "guid.h"
 #include <string>
 
 namespace KDB::Utilities
@@ -8,7 +9,7 @@ namespace KDB::Utilities
 	{
 		vec.push_back(value);
 	}
-
+	
 	void push_varint(std::vector<char>& vec, unsigned long long value, char size);
 	void push_ushort(std::vector<char>& vec, unsigned short value);
 	void push_int(std::vector<char>& vec, int value);
@@ -19,6 +20,8 @@ namespace KDB::Utilities
 	void push_vector(std::vector<char>& vec, const std::vector<char>& value);
 
 	//reading utilities
+	void read_GUID(std::fstream& stream, GUID* value);
+	void read_char(std::fstream& stream, char* value);
 	void read_varint(std::fstream& stream, unsigned long long* value, char size);
 	void read_int(std::fstream& stream, int* value);
 	void read_int64(std::fstream& stream, unsigned long long* value);
