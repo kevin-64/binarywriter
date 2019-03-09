@@ -24,6 +24,14 @@ namespace KDB::Primitives
 		m_size = getSize();
 	}
 
+	BlockDefinition::~BlockDefinition()
+	{
+		for (auto it = begin(m_partitions); it != end(m_partitions); it++)
+		{
+			delete *it;
+		}
+	}
+
 	BlockDefinition::BlockDefinition(BlockDefinition&& other) noexcept
 		: BlockDefinition::BlockDefinition()
 	{
@@ -68,6 +76,7 @@ namespace KDB::Primitives
 			Utilities::push_vector(data, part);
 		}
 
+		data.push_back(END_OF_BLOCK);
 		return data;
 	}
 
@@ -95,8 +104,15 @@ namespace KDB::Primitives
 		std::vector<PartitionDefinition*> partitions;
 
 		//read the partitions as separate records
-		while (stream.peek() != END_OF_BLOCK)
+		while (true)
 		{
+			char next = stream.peek();
+
+			if (next == END_OF_BLOCK)
+				break;
+			
+			stream.read(&next, 1);
+
 			auto part = buildPartitionDefinition(stream);
 			partitions.push_back(part.release());
 		}

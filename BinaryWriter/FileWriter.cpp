@@ -4,6 +4,8 @@
 #include "Type.h"
 #include "ConfigEntry.h"
 #include "Pointer.h"
+#include "BlockDefinition.h"
+#include "PartitionDefinition.h"
 #include "shortcuts.h"
 
 namespace KDB::Binary
@@ -71,6 +73,10 @@ namespace KDB::Binary
 				return buildConfigEntry(m_stream);
 			case RecordType::POINTER_RECORD:
 				return buildPointer(m_stream, m_settings->PointerFormat);
+			case RecordType::BLOCK_DEFINITION:
+				return buildBlockDefinition(m_stream);
+			case RecordType::BLOCK_PARTITION:
+				return buildPartitionDefinition(m_stream);
 			//TODO: altri tipi di record
 		}
 	}

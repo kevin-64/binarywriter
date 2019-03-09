@@ -35,6 +35,19 @@ Guid& Guid::operator=(Guid&& rhs) noexcept
 	return *this;
 }
 
+Guid::Guid(const Guid& from)
+	: m_guid(from.m_guid)
+{
+}
+
+Guid& Guid::operator=(const Guid& rhs)
+{
+	if (&rhs == this)
+		return *this;
+
+	this->m_guid = rhs.m_guid;
+	return *this;
+}
 unique_ptr<string> Guid::toString() const
 {
 	std::stringstream stream;

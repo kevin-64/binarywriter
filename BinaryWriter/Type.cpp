@@ -97,6 +97,11 @@ namespace KDB::Primitives
 		return size;
 	}
 
+	const Guid& Type::getTypeId() const
+	{
+		return this->m_typeId;
+	}
+
 	std::string_view Type::getName() const
 	{
 		return this->m_name;

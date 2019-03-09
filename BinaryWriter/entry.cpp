@@ -6,6 +6,7 @@
 #include "Type.h"
 #include "Field.h"
 #include "FieldType.h"
+#include "BlockDefinition.h"
 #include "shortcuts.h"
 #include "FileWriter.h"
 
@@ -19,12 +20,15 @@ using Core = KDB::Binary::Core;
 using namespace std::string_literals;
 
 void writeDef(Core&);
-void readDef(Core&);
+std::unique_ptr<KDB::Contracts::IDBRecord> readDef(Core&);
 
 void writeConf(Core&);
 
 void writePtr(Core&);
 void readPtr(Core&);
+
+void writeBlock(Core&, const Guid&);
+void readBlock(Core&);
 
 int main()
 {
@@ -34,9 +38,11 @@ int main()
 
 	//writeConf(core);
 	//writeDef(core);
-	readDef(core);
+	//auto tydef = dynamic_cast<KDB::Primitives::Type*>(readDef(core).release());
+	//writeBlock(core, tydef->getTypeId());
 	//writePtr(core);
 	//readPtr(core);
+	readBlock(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
@@ -76,9 +82,9 @@ void writeDef(Core& core)
 	core.addType(type);
 }
 
-void readDef(Core& core)
+auto readDef(Core& core) -> decltype(core.getType(0))
 {
-	auto record = core.getType(0);
+	return core.getType(0);
 }
 
 void readConf(Core& core)
@@ -96,4 +102,25 @@ void writePtr(Core& core)
 void readPtr(Core& core)
 {
 	auto record = core.getPointer(0);
+}
+
+void writeBlock(Core& core, const Guid& typeId)
+{
+	GUID guid;
+	CoCreateGuid(&guid);
+	Guid blockID(std::move(guid));
+
+	Guid typeID(typeId);
+
+	std::vector<KDB::Primitives::PartitionDefinition*> parts;
+	auto part1 = new KDB::Primitives::PartitionDefinition(0, 1, 1, 0);
+	parts.emplace_back(part1);
+
+	KDB::Primitives::BlockDefinition bd(blockID, typeID, std::move(parts));
+	core.addBlock(bd);
+}
+
+void readBlock(Core& core)
+{
+	auto record = core.getBlock(0);
 }

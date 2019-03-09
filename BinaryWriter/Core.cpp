@@ -145,6 +145,16 @@ namespace KDB::Binary
 	{
 		return m_ptrFile->readRecord(offset);
 	}
+
+	void Core::addBlock(const KDB::Primitives::BlockDefinition& block)
+	{
+		m_blocksFile->writeRecord(block);
+	}
+
+	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getBlock(long long offset)
+	{
+		return m_blocksFile->readRecord(offset);
+	}
 	
 	void Core::readConfiguration()
 	{

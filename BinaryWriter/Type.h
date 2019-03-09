@@ -43,6 +43,8 @@ namespace KDB::Primitives
 		virtual std::string_view getName() const override;
 		virtual const KDB::Primitives::Field& getField(int) const override;
 
+		const Guid& getTypeId() const;
+
 		friend std::unique_ptr<Type> buildType(std::fstream& stream);
 	};
 

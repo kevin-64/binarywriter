@@ -21,7 +21,7 @@ namespace KDB::Primitives
 
 	public:
 		BlockDefinition(Guid blockId, Guid typeId, std::vector<PartitionDefinition*>&& partitions);
-		virtual ~BlockDefinition() = default;
+		virtual ~BlockDefinition();
 
 		friend void swapBlockDefinitions(BlockDefinition& lhs, BlockDefinition& rhs) noexcept;
 

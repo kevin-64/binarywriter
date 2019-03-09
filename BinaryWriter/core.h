@@ -6,6 +6,7 @@
 #include "ConfigEntry.h"
 #include "Pointer.h"
 #include "PointerFormat.h"
+#include "BlockDefinition.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -45,7 +46,10 @@ namespace KDB::Binary {
 		std::unique_ptr<KDB::Contracts::IDBRecord> getConfigEntry(long long offset);
 		void addConfigEntry(const KDB::Primitives::ConfigEntry& entry);
 
-		void addPointer(const KDB::Primitives::Pointer& ptr);
 		std::unique_ptr<KDB::Contracts::IDBRecord> getPointer(long long offset);
+		void addPointer(const KDB::Primitives::Pointer& ptr);
+
+		std::unique_ptr<KDB::Contracts::IDBRecord> getBlock(long long offset);
+		void addBlock(const KDB::Primitives::BlockDefinition& block);
 	};
 }
