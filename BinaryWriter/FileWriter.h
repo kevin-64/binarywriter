@@ -3,6 +3,7 @@
 #include "IDBRecord.h"
 #include "ConfigSettings.h"
 #include "RecordType.h"
+#include "BlockDefinition.h"
 #include <string>
 #include <string_view>
 #include <iostream>
@@ -31,5 +32,7 @@ namespace KDB::Binary
 
 		bool writeRecord(const Contracts::IDBRecord& record);
 		std::unique_ptr<Contracts::IDBRecord> readRecord(long long offset);
+
+		std::unique_ptr<Primitives::BlockDefinition> scanForBlockType(Guid typeId);
 	};
 }

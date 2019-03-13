@@ -36,6 +36,8 @@ namespace KDB::Primitives
 		virtual std::vector<char> getData() const override;
 		virtual int getSize() const override;
 
+		Guid getTypeId() const;
+
 		friend std::unique_ptr<BlockDefinition> buildBlockDefinition(std::fstream& stream);
 	};
 

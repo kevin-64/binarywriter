@@ -9,13 +9,13 @@ namespace KDB::Utilities
 	{
 		switch (size) {
 		case 4:
-			push_int(vec, value);
+			push_int(vec, static_cast<int>(value));
 			break;
 		case 8:
 			push_int64(vec, value);
 			break;
 		case 2:
-			push_ushort(vec, value);
+			push_ushort(vec, static_cast<unsigned short>(value));
 			break;
 		}
 	}

@@ -50,6 +50,8 @@ namespace KDB::Primitives
 	{
 		std::vector<char> data;
 
+//disabilitiamo gli warning per il troncamento
+#pragma warning( disable : 4305 4309)
 		data.push_back(RecordType::BLOCK_PARTITION);
 		Utilities::push_char(data, m_partitionId);
 		Utilities::push_int64(data, m_partitionSize);

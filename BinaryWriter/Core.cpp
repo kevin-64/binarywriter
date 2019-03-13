@@ -83,7 +83,7 @@ namespace KDB::Binary
 			}
 			else 
 			{
-				throw new std::runtime_error("Unrecognized file type: " + key);
+				throw std::runtime_error("Unrecognized file type: " + key);
 			}
 		}
 
@@ -93,7 +93,7 @@ namespace KDB::Binary
 		//TODO: currently disabled during development
 		/*if (initStatus != 0xFF)
 		{
-			throw new std::runtime_error("Error during initialization: status " + std::to_string(initStatus));
+			throw std::runtime_error("Error during initialization: status " + std::to_string(initStatus));
 		}*/
 	}
 
@@ -173,5 +173,10 @@ namespace KDB::Binary
 		record = m_configFile->readRecord(offset);
 		cfgEntry = dynamic_cast<KDB::Primitives::ConfigEntry*>(record.get());
 		m_settings.PointerFormat.OffsetSize = cfgEntry->getIntValue();
+	}
+
+	std::unique_ptr<KDB::Primitives::BlockDefinition> Core::seekBlock(Guid typeId)
+	{
+		return m_blocksFile->scanForBlockType(typeId);
 	}
 }

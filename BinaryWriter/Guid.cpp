@@ -9,6 +9,11 @@ void swapGuid(Guid& lhs, Guid& rhs) noexcept
 	std::swap(lhs.m_guid, rhs.m_guid);
 }
 
+bool operator==(const Guid& lhs, const Guid& rhs)
+{
+	return lhs.m_guid == rhs.m_guid;
+}
+
 Guid::Guid()
 {
 	auto result = CoCreateGuid(&m_guid);
@@ -48,7 +53,7 @@ Guid& Guid::operator=(const Guid& rhs)
 	this->m_guid = rhs.m_guid;
 	return *this;
 }
-unique_ptr<string> Guid::toString() const
+std::string Guid::toString() const
 {
 	std::stringstream stream;
 	stream << std::hex << m_guid.Data1    << "-"
@@ -63,7 +68,7 @@ unique_ptr<string> Guid::toString() const
 		   << std::hex << +m_guid.Data4[6]
 		   << std::hex << +m_guid.Data4[7];
 		
-	return std::make_unique<string>(stream.str());
+	return stream.str();
 }
 
 vector<char> Guid::serialize() const

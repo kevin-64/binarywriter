@@ -80,4 +80,26 @@ namespace KDB::Binary
 			//TODO: altri tipi di record
 		}
 	}
+
+	std::unique_ptr<BlockDefinition> FileWriter::scanForBlockType(Guid typeId)
+	{
+		char recordType;
+		m_stream.seekg(0);
+
+		do {
+			m_stream.read(&recordType, 1);
+			auto type = reinterpret_cast<unsigned char*>(&recordType);
+			if (RecordType::BLOCK_DEFINITION != *type)
+				throw std::runtime_error("Internal error: invalid record type " +
+					std::to_string(*type) +
+					" while scanning for types.");
+
+			auto bd = buildBlockDefinition(m_stream);
+			if (bd->getTypeId() == typeId)
+				return bd;
+		} while (m_stream.peek() != EOF);
+
+		auto id = typeId.toString();
+		throw std::runtime_error("No blocks have been allocated for type {" + id + "}");
+	}
 }

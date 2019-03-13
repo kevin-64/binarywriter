@@ -30,6 +30,8 @@ void readPtr(Core&);
 void writeBlock(Core&, const Guid&);
 void readBlock(Core&);
 
+void seekBlock(Core&, Guid);
+
 int main()
 {
 	auto start = std::chrono::system_clock::now();
@@ -38,11 +40,12 @@ int main()
 
 	//writeConf(core);
 	//writeDef(core);
-	//auto tydef = dynamic_cast<KDB::Primitives::Type*>(readDef(core).release());
+	auto tydef = dynamic_cast<KDB::Primitives::Type*>(readDef(core).release());
+	seekBlock(core, tydef->getTypeId());
 	//writeBlock(core, tydef->getTypeId());
 	//writePtr(core);
 	//readPtr(core);
-	readBlock(core);
+	//readBlock(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
@@ -113,7 +116,7 @@ void writeBlock(Core& core, const Guid& typeId)
 	Guid typeID(typeId);
 
 	std::vector<KDB::Primitives::PartitionDefinition*> parts;
-	auto part1 = new KDB::Primitives::PartitionDefinition(0, 1, 1, 0);
+	auto part1 = new KDB::Primitives::PartitionDefinition(0, 0, 1, 0);
 	parts.emplace_back(part1);
 
 	KDB::Primitives::BlockDefinition bd(blockID, typeID, std::move(parts));
@@ -123,4 +126,9 @@ void writeBlock(Core& core, const Guid& typeId)
 void readBlock(Core& core)
 {
 	auto record = core.getBlock(0);
+}
+
+void seekBlock(Core& core, Guid guid) 
+{
+	auto block = core.seekBlock(guid);
 }

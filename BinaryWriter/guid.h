@@ -14,6 +14,7 @@ public:
 	virtual ~Guid() = default;
 
 	friend void swapGuid(Guid& lhs, Guid& rhs) noexcept;
+	friend bool operator==(const Guid& lhs, const Guid& rhs);
 
 	Guid(Guid&& other) noexcept;
 	Guid& operator=(Guid&& rhs) noexcept;
@@ -21,6 +22,6 @@ public:
 	Guid(const Guid& other);
 	Guid& operator=(const Guid& rhs);
 
-	std::unique_ptr<std::string> toString() const;
+	std::string toString() const;
 	std::vector<char> serialize() const;
 };

@@ -51,5 +51,8 @@ namespace KDB::Binary {
 
 		std::unique_ptr<KDB::Contracts::IDBRecord> getBlock(long long offset);
 		void addBlock(const KDB::Primitives::BlockDefinition& block);
+
+		//temporanea: nella versione finale il chiamante non ha necessità di conoscere il blocco
+		std::unique_ptr<KDB::Primitives::BlockDefinition> seekBlock(Guid typeId);
 	};
 }

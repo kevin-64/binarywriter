@@ -92,6 +92,11 @@ namespace KDB::Primitives
 		return size;
 	}
 
+	Guid BlockDefinition::getTypeId() const
+	{
+		return this->m_mainTypeId;
+	}
+
 	std::unique_ptr<BlockDefinition> buildBlockDefinition(std::fstream& stream)
 	{
 		GUID guid;
@@ -106,13 +111,12 @@ namespace KDB::Primitives
 		//read the partitions as separate records
 		while (true)
 		{
-			char next = stream.peek();
+			char next;
+			stream.read(&next, 1);
 
 			if (next == END_OF_BLOCK)
 				break;
-			
-			stream.read(&next, 1);
-
+				
 			auto part = buildPartitionDefinition(stream);
 			partitions.push_back(part.release());
 		}
