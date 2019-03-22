@@ -1,7 +1,7 @@
 #include "Field.h"
 #include "shortcuts.h"
 
-using signPair = std::pair<std::string_view, int>;
+using signPair = std::pair<const std::string&, int>;
 
 namespace KDB::Primitives
 {
@@ -38,6 +38,6 @@ namespace KDB::Primitives
 
 	signPair Field::getFieldSignature() const
 	{
-		return std::make_pair(std::string_view(this->m_name), static_cast<char>(this->m_type));
+		return std::make_pair(this->m_name, static_cast<char>(this->m_type));
 	}
 }

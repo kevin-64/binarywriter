@@ -18,6 +18,8 @@ namespace KDB::Utilities
 	void push_string(std::vector<char>& vec, const std::string& value);
 	void push_stringview(std::vector<char>& vec, std::string_view value);
 	void push_vector(std::vector<char>& vec, const std::vector<char>& value);
+	void push_memory(std::vector<char>& vec, int size, void* memory);
+	void writeover_int(std::vector<char>& vec, int position, int value);
 
 	//reading utilities
 	void read_GUID(std::fstream& stream, GUID* value);

@@ -4,6 +4,7 @@
 #include "ConfigSettings.h"
 #include "RecordType.h"
 #include "BlockDefinition.h"
+#include "IDBType.h"
 #include <string>
 #include <string_view>
 #include <iostream>
@@ -34,5 +35,6 @@ namespace KDB::Binary
 		std::unique_ptr<Contracts::IDBRecord> readRecord(long long offset);
 
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockType(Guid typeId);
+		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(const std::string& typeName);
 	};
 }

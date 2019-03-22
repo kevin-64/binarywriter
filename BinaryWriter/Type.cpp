@@ -6,7 +6,7 @@
 
 namespace KDB::Primitives
 {
-	void swapType(Type& lhs, Type& rhs) noexcept
+	void swapTypes(Type& lhs, Type& rhs) noexcept
 	{
 		std::swap(lhs.m_name, rhs.m_name);
 		std::swap(lhs.m_fields, rhs.m_fields);
@@ -26,7 +26,7 @@ namespace KDB::Primitives
 	Type::Type(Type&& other) noexcept
 		: Type::Type() 
 	{
-		swapType(*this, other);
+		swapTypes(*this, other);
 	}
 
 	Type& Type::operator=(Type&& rhs) noexcept
@@ -35,7 +35,7 @@ namespace KDB::Primitives
 			return *this;
 
 		Type t(std::move(rhs));
-		swapType(*this, t);
+		swapTypes(*this, t);
 		return *this;
 	}
 
@@ -110,6 +110,11 @@ namespace KDB::Primitives
 	const KDB::Primitives::Field& Type::getField(int index) const
 	{
 		return this->m_fields[index];
+	}
+
+	const char Type::getFieldCount() const
+	{
+		return static_cast<char>(this->m_fields.size());
 	}
 
 	std::unique_ptr<Type> buildType(std::fstream& stream)

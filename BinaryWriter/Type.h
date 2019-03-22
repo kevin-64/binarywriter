@@ -27,7 +27,7 @@ namespace KDB::Primitives
 		Type(std::string name, std::vector<Field>&& fields, Guid&& guid);
 		virtual ~Type() = default;
 
-		friend void swapType(Type& lhs, Type& rhs) noexcept;
+		friend void swapTypes(Type& lhs, Type& rhs) noexcept;
 
 		//move semantics are supported
 		Type(Type&& other) noexcept;
@@ -42,6 +42,7 @@ namespace KDB::Primitives
 
 		virtual std::string_view getName() const override;
 		virtual const KDB::Primitives::Field& getField(int) const override;
+		const char getFieldCount() const;
 
 		const Guid& getTypeId() const;
 

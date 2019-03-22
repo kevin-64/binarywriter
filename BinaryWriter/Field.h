@@ -28,6 +28,6 @@ namespace KDB::Primitives
 		Field(const Field&) = delete;
 		Field& operator=(const Field&) = delete;
 
-		std::pair<std::string_view, int> getFieldSignature() const;
+		std::pair<const std::string&, int> getFieldSignature() const;
 	};
 }

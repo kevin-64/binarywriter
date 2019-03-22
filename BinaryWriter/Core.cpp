@@ -179,4 +179,9 @@ namespace KDB::Binary
 	{
 		return m_blocksFile->scanForBlockType(typeId);
 	}
+
+	std::unique_ptr<KDB::Contracts::IDBType> Core::seekType(const std::string& typeName)
+	{
+		return m_typesFile->scanForTypeDefinition(typeName);
+	}
 }

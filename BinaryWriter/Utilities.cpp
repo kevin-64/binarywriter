@@ -69,6 +69,22 @@ namespace KDB::Utilities
 		std::copy(begin(value), end(value), std::back_inserter(vec));
 	}
 
+	void push_memory(vector<char>& vec, int size, void* memory)
+	{
+		//first we expand to vector to accommodate the extra data, then we obtain a pointer to the end
+		//of the current data and copy the new memory there
+		int currEnd = vec.size();
+		vec.reserve(vec.size() + size);
+		char* dest = vec.data() + vec.size();
+		std::memcpy(dest, memory, size);
+	}
+
+	void writeover_int(std::vector<char>& vec, int position, int value)
+	{
+		char* dest = vec.data() + position;
+		std::memcpy(dest, &value, sizeof(int));
+	}
+
 	void read_GUID(std::fstream& stream, GUID* value)
 	{
 		read_ulong(stream, &(value->Data1));

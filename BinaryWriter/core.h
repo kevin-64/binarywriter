@@ -54,5 +54,7 @@ namespace KDB::Binary {
 
 		//temporanea: nella versione finale il chiamante non ha necessità di conoscere il blocco
 		std::unique_ptr<KDB::Primitives::BlockDefinition> seekBlock(Guid typeId);
+
+		std::unique_ptr<KDB::Contracts::IDBType> seekType(const std::string& typeName);
 	};
 }

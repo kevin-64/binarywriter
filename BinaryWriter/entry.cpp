@@ -19,7 +19,7 @@ using Core = KDB::Binary::Core;
 
 using namespace std::string_literals;
 
-void writeDef(Core&);
+void writeType(Core&);
 std::unique_ptr<KDB::Contracts::IDBRecord> readDef(Core&);
 
 void writeConf(Core&);
@@ -29,8 +29,9 @@ void readPtr(Core&);
 
 void writeBlock(Core&, const Guid&);
 void readBlock(Core&);
-
 void seekBlock(Core&, Guid);
+
+void seekType(Core&, const std::string&);
 
 int main()
 {
@@ -41,7 +42,8 @@ int main()
 	//writeConf(core);
 	//writeDef(core);
 	auto tydef = dynamic_cast<KDB::Primitives::Type*>(readDef(core).release());
-	seekBlock(core, tydef->getTypeId());
+	//seekBlock(core, tydef->getTypeId());
+	seekType(core, "MyType");
 	//writeBlock(core, tydef->getTypeId());
 	//writePtr(core);
 	//readPtr(core);
@@ -73,7 +75,7 @@ void writeConf(Core& core)
 	core.addConfigEntry(conf3);
 }
 
-void writeDef(Core& core)
+void writeType(Core& core)
 {
 	auto name("MyType"s);
 	auto fName("MyField"s);
@@ -131,4 +133,10 @@ void readBlock(Core& core)
 void seekBlock(Core& core, Guid guid) 
 {
 	auto block = core.seekBlock(guid);
+}
+
+void seekType(Core& core, const std::string& name)
+{
+	auto type = core.seekType(name);
+	const KDB::Contracts::IDBType* r = type.get();
 }

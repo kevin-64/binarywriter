@@ -1,1 +1,5 @@
-- Gestione blocchi/indirizzi/storage
+- Modifica record
+- Eliminazione record
+
+- Riordino eccezioni
+- Pulizia interfaccia Core

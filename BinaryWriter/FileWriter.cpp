@@ -52,7 +52,8 @@ namespace KDB::Binary
 
 	bool FileWriter::writeRecord(const IDBRecord& record)
 	{
-		m_stream.write(record.getData().data(), record.getSize());
+		auto data = record.getData();
+		m_stream.write(data.data(), data.size());
 		return true;
 	}
 
@@ -92,7 +93,7 @@ namespace KDB::Binary
 			if (RecordType::BLOCK_DEFINITION != *type)
 				throw std::runtime_error("Internal error: invalid record type " +
 					std::to_string(*type) +
-					" while scanning for types.");
+					" while scanning blocks.");
 
 			auto bd = buildBlockDefinition(m_stream);
 			if (bd->getTypeId() == typeId)
@@ -101,5 +102,26 @@ namespace KDB::Binary
 
 		auto id = typeId.toString();
 		throw std::runtime_error("No blocks have been allocated for type {" + id + "}");
+	}
+
+	std::unique_ptr<Contracts::IDBType> FileWriter::scanForTypeDefinition(const std::string& typeName)
+	{
+		char recordType;
+		m_stream.seekg(0);
+
+		do {
+			m_stream.read(&recordType, 1);
+			auto type = reinterpret_cast<unsigned char*>(&recordType);
+			if (RecordType::TYPE_DEFINITION != *type)
+				throw std::runtime_error("Internal error: invalid record type " +
+					std::to_string(*type) +
+					" while scanning types.");
+
+			auto t = buildType(m_stream);
+			if (t->getName() == typeName)
+				return t;
+		} while (m_stream.peek() != EOF);
+
+		throw std::runtime_error("Type {" + typeName + "} has not been recognized.");
 	}
 }

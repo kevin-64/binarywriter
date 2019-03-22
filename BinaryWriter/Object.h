@@ -7,22 +7,38 @@
 
 namespace KDB::Primitives
 {
+	const char EMPTY_FIELD_LIST_MARKER = static_cast<char>(0xFD);
+	const char EMPTY_SINGLE_FIELD_MARKER = static_cast<char>(0xFF);
+	const char LONG_RECORD_MARKER = static_cast<char>(0xE0);
+
 	class Object : public Contracts::IDBRecord
 	{
 	private:
-		const Type& m_type;
-		std::unique_ptr<std::map<std::string, void*>> m_attributes;
+		Object() = default;
+		const Type* m_type;
+		const std::map<std::string, void*>* m_attributes;
+		int m_size;
+
+		int writeFieldData(std::vector<char> data, void* fieldData, FieldType fieldType) const;
 	public:
-		Object(const Type& type, std::unique_ptr<std::map<std::string, void*>> attributes);
+		Object(const Type* type, const std::map<std::string, void*>* attributes);
 		virtual ~Object() = default;
 
-		Object(Object&& other) = delete;
-		Object& operator=(Object&& rhs) = delete;
+		friend void swapObjects(Object& lhs, Object& rhs) noexcept;
 
+		//move semantics are supported
+		Object(Object&& other) noexcept;
+		Object& operator=(Object&& rhs) noexcept;
+
+		//No copy is allowed
 		Object(const Object& other) = delete;
 		Object& operator=(const Object& rhs) = delete;
 
 		virtual std::vector<char> getData() const override;
 		virtual int getSize() const override;
+
+		friend std::unique_ptr<Object> buildObject(std::fstream& stream);
 	};
+
+	std::unique_ptr<Object> buildObject(std::fstream& stream);
 }
