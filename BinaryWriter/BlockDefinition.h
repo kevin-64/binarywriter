@@ -16,11 +16,12 @@ namespace KDB::Primitives
 		BlockDefinition() = default;
 		Guid m_blockId;
 		Guid m_mainTypeId;
+		unsigned long long m_blockOffset;
 		std::vector<PartitionDefinition*> m_partitions;	
 		int m_size;
 
 	public:
-		BlockDefinition(Guid blockId, Guid typeId, std::vector<PartitionDefinition*>&& partitions);
+		BlockDefinition(Guid blockId, unsigned long long offset, Guid typeId, std::vector<PartitionDefinition*>&& partitions);
 		virtual ~BlockDefinition();
 
 		friend void swapBlockDefinitions(BlockDefinition& lhs, BlockDefinition& rhs) noexcept;
@@ -38,8 +39,13 @@ namespace KDB::Primitives
 
 		Guid getTypeId() const;
 
+		//returns the block offset and an available partition for this block
+		std::pair<unsigned long long, const PartitionDefinition*> getPartitionForWrite() const;
+
 		friend std::unique_ptr<BlockDefinition> buildBlockDefinition(std::fstream& stream);
+		friend void skipBlockDefinition(std::fstream& stream);
 	};
 
 	std::unique_ptr<BlockDefinition> buildBlockDefinition(std::fstream& stream);
+	void skipBlockDefinition(std::fstream& stream);
 }

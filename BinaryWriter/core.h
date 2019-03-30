@@ -7,6 +7,7 @@
 #include "Pointer.h"
 #include "PointerFormat.h"
 #include "BlockDefinition.h"
+#include "Object.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -51,6 +52,8 @@ namespace KDB::Binary {
 
 		std::unique_ptr<KDB::Contracts::IDBRecord> getBlock(long long offset);
 		void addBlock(const KDB::Primitives::BlockDefinition& block);
+
+		void addRecord(const KDB::Primitives::Object& object);
 
 		//temporanea: nella versione finale il chiamante non ha necessità di conoscere il blocco
 		std::unique_ptr<KDB::Primitives::BlockDefinition> seekBlock(Guid typeId);

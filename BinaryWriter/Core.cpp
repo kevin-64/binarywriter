@@ -136,6 +136,21 @@ namespace KDB::Binary
 		m_configFile->writeRecord(entry);
 	}
 
+	void Core::addRecord(const KDB::Primitives::Object& object)
+	{
+		auto typeId = object.getTypeId();
+		auto block = seekBlock(typeId);
+
+		auto part = block->getPartitionForWrite();
+		auto coord = (part.second)->getPartitionCoordinates();
+
+		auto size = (part.second)->getPartitionSize();
+		auto offset = part.first + coord.second;
+
+		auto limit = offset + size - 1;
+		m_storageFiles.at(coord.first).writeRecordAfterOffset(object, offset, limit);
+	}
+
 	void Core::addPointer(const KDB::Primitives::Pointer& ptr)
 	{
 		m_ptrFile->writeRecord(ptr);
@@ -148,6 +163,15 @@ namespace KDB::Binary
 
 	void Core::addBlock(const KDB::Primitives::BlockDefinition& block)
 	{
+		auto blockOffsetAndPartition = block.getPartitionForWrite();
+		auto fileAndAdjustment = (blockOffsetAndPartition.second)->getPartitionCoordinates();
+
+		auto size = (blockOffsetAndPartition.second)->getPartitionSize();
+		auto offset = blockOffsetAndPartition.first + fileAndAdjustment.second;
+		
+		//the partition needs to be allocated before use
+		m_storageFiles.at(fileAndAdjustment.first).allocatePartition(offset, size);
+
 		m_blocksFile->writeRecord(block);
 	}
 

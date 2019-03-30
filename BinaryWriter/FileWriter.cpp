@@ -57,6 +57,28 @@ namespace KDB::Binary
 		return true;
 	}
 
+	bool FileWriter::writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit)
+	{
+		m_stream.seekp(offset);
+		
+		//scan for a free location (indicated by 0xFF as the record type id)
+		while (m_stream.peek() != RecordType::DELETED_ENTRY)
+		{
+			skipRecord();
+		}
+
+		//TODO: check whether there actually is enough space to write the whole record, not just if we are at the end
+		//if we reach/pass the end, there is no space to write the record
+		if (m_stream.tellp() >= limit)
+		{
+			throw std::runtime_error("Could not write record due to full partition - scanned from " + std::to_string(offset) + " to " + std::to_string(limit) + ".");
+		}
+
+		writeRecord(record);
+
+		return true;
+	}
+
 	std::unique_ptr<IDBRecord> FileWriter::readRecord(long long offset) 
 	{
 		m_stream.seekg(offset);
@@ -82,18 +104,57 @@ namespace KDB::Binary
 		}
 	}
 
+	void FileWriter::skipRecord()
+	{
+		char recordType;
+		m_stream.read(&recordType, 1);
+
+		auto type = reinterpret_cast<unsigned char*>(&recordType);
+
+		//the amount of bytes to skip depends on the type of record (and, for some types,
+		//on the content of the record itself)
+		switch (*type)
+		{
+			case RecordType::TYPE_DEFINITION:
+				skipType(m_stream);
+			case RecordType::CONFIG_RECORD:
+				skipConfigEntry(m_stream);
+			case RecordType::POINTER_RECORD:
+				skipPointer(m_stream, m_settings->PointerFormat);
+			case RecordType::BLOCK_DEFINITION:
+				skipBlockDefinition(m_stream);
+			case RecordType::BLOCK_PARTITION:
+				skipPartitionDefinition(m_stream);
+			//TODO: altri tipi di record
+		}
+	}
+
+	void FileWriter::allocatePartition(unsigned long long offset, unsigned long long size)
+	{
+		m_stream.seekp(offset);
+		
+		vector<char> fillVector{ (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF };
+		int64 count = 0;
+
+		//the entire partition is blanked with 0xFF, 8 bytes at a time
+		do
+		{
+			m_stream.write(fillVector.data(), fillVector.size());
+			count += sizeof(int64);
+		} while (count < size);
+	}
+
 	std::unique_ptr<BlockDefinition> FileWriter::scanForBlockType(Guid typeId)
 	{
 		char recordType;
 		m_stream.seekg(0);
 
-		do {
+		do 
+		{
 			m_stream.read(&recordType, 1);
 			auto type = reinterpret_cast<unsigned char*>(&recordType);
 			if (RecordType::BLOCK_DEFINITION != *type)
-				throw std::runtime_error("Internal error: invalid record type " +
-					std::to_string(*type) +
-					" while scanning blocks.");
+				throw std::runtime_error("Internal error: invalid record type " + std::to_string(*type) + " while scanning blocks.");
 
 			auto bd = buildBlockDefinition(m_stream);
 			if (bd->getTypeId() == typeId)
@@ -109,13 +170,12 @@ namespace KDB::Binary
 		char recordType;
 		m_stream.seekg(0);
 
-		do {
+		do 
+		{
 			m_stream.read(&recordType, 1);
 			auto type = reinterpret_cast<unsigned char*>(&recordType);
 			if (RecordType::TYPE_DEFINITION != *type)
-				throw std::runtime_error("Internal error: invalid record type " +
-					std::to_string(*type) +
-					" while scanning types.");
+				throw std::runtime_error("Internal error: invalid record type " + std::to_string(*type) + " while scanning types.");
 
 			auto t = buildType(m_stream);
 			if (t->getName() == typeName)

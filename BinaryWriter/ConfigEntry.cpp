@@ -103,4 +103,14 @@ namespace KDB::Primitives
 
 		return std::make_unique<ConfigEntry>(ConfigEntry(key, std::move(data)));
 	}
+
+	void skipConfigEntry(std::fstream& stream)
+	{
+		stream.ignore(9); //we skip the key
+
+		int length;
+		Utilities::read_int(stream, &length);
+
+		stream.ignore(length); //the actual configuration is not read to avoid needless allocations
+	}
 }

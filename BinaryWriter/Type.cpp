@@ -146,4 +146,10 @@ namespace KDB::Primitives
 
 		return std::make_unique<Type>(Type(std::string(name.begin(), name.end()), std::move(fields), std::move(g)));
 	}
+
+	void skipType(std::fstream& stream)
+	{
+		//type records are highly variable so it is more efficient to just read them in order to advance the stream position
+		buildType(stream);
+	}
 }

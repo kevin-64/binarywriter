@@ -14,12 +14,13 @@ namespace KDB::Primitives
 	{
 		std::swap(lhs.m_blockId, rhs.m_blockId);
 		std::swap(lhs.m_mainTypeId, rhs.m_mainTypeId);
+		std::swap(lhs.m_blockOffset, rhs.m_blockOffset);
 		std::swap(lhs.m_partitions, rhs.m_partitions);
 		std::swap(lhs.m_size, rhs.m_size);
 	}
 
-	BlockDefinition::BlockDefinition(Guid blockId, Guid typeId, std::vector<PartitionDefinition*>&& partitions)
-		: m_blockId(std::move(blockId)), m_mainTypeId(std::move(typeId)), m_partitions(std::move(partitions)), m_size(0)
+	BlockDefinition::BlockDefinition(Guid blockId, unsigned long long offset, Guid typeId, std::vector<PartitionDefinition*>&& partitions)
+		: m_blockId(std::move(blockId)), m_mainTypeId(std::move(typeId)), m_blockOffset(offset), m_partitions(std::move(partitions)), m_size(0)
 	{
 		m_size = getSize();
 	}
@@ -51,8 +52,9 @@ namespace KDB::Primitives
 	/* Format of a "BlockDefinition" record:
 	 * 0:	     BlockDefinition record identifier (0xB0)
 	 * 1-16:	 Block ID (BID) for this block
-	 * 17-32:	 Type ID (TID) for the main user-defined type contained in this block
-	 * 33-...	 Partition definition(s), at least 1
+	 * 17-24:    Offset of the block in its main file; this defines the starting point to calculate the adjustments when the block is partitioned
+	 * 25-40:	 Type ID (TID) for the main user-defined type contained in this block
+	 * 41-...	 Partition definition(s), at least 1
 	 */
 	 //Return by-value is efficient as the variable is local thanks to copy elision/RVO
 	std::vector<char> BlockDefinition::getData() const
@@ -65,6 +67,8 @@ namespace KDB::Primitives
 
 		auto blockId = m_blockId.serialize();
 		Utilities::push_vector(data, blockId);
+
+		Utilities::push_int64(data, m_blockOffset);
 
 		auto typeId = m_mainTypeId.serialize();
 		Utilities::push_vector(data, typeId);
@@ -86,7 +90,7 @@ namespace KDB::Primitives
 		if (this->m_size != 0)
 			return this->m_size;
 
-		auto size = 34; //record identifier, block ID and type ID, plus an "end of block" identifier
+		auto size = 42; //record identifier, block ID, offset and type ID, plus an "end of block" identifier
 		size += (this->m_partitions.size() * this->m_partitions.at(0)->getSize()); //partition def. size is fixed
 
 		return size;
@@ -97,11 +101,19 @@ namespace KDB::Primitives
 		return this->m_mainTypeId;
 	}
 
+	std::pair<unsigned long long, const PartitionDefinition*> BlockDefinition::getPartitionForWrite() const
+	{
+		return std::make_pair(this->m_blockOffset, this->m_partitions.at(0));
+	}
+
 	std::unique_ptr<BlockDefinition> buildBlockDefinition(std::fstream& stream)
 	{
 		GUID guid;
 		Utilities::read_GUID(stream, &guid);
 		Guid blockId(std::move(guid));
+
+		int64 blockOffset;
+		Utilities::read_int64(stream, &blockOffset);
 
 		Utilities::read_GUID(stream, &guid);
 		Guid typeId(std::move(guid));
@@ -121,6 +133,22 @@ namespace KDB::Primitives
 			partitions.push_back(part.release());
 		}
 
-		return std::make_unique<BlockDefinition>(BlockDefinition(std::move(blockId), std::move(typeId), std::move(partitions)));
+		return std::make_unique<BlockDefinition>(BlockDefinition(std::move(blockId), std::move(blockOffset), std::move(typeId), std::move(partitions)));
+	}
+
+	void skipBlockDefinition(std::fstream& stream)
+	{
+		stream.ignore(40); //the entire block definition is skipped as its size is fixed
+
+		while (true)
+		{
+			char next;
+			stream.read(&next, 1);
+
+			if (next == END_OF_BLOCK)
+				break;
+
+			skipPartitionDefinition(stream);
+		}
 	}
 }

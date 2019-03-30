@@ -39,7 +39,9 @@ namespace KDB::Primitives
 		int getIntValue();
 
 		friend std::unique_ptr<ConfigEntry> buildConfigEntry(std::fstream& stream);
+		friend void skipConfigEntry(std::fstream& stream);
 	};
 
 	std::unique_ptr<ConfigEntry> buildConfigEntry(std::fstream& stream);
+	void skipConfigEntry(std::fstream& stream);
 }

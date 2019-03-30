@@ -6,6 +6,8 @@
 
 namespace KDB::Primitives
 {
+	const int PARTITION_RECORD_SIZE = 22;
+
 	/*
 	* Describes the definition of a partition of a storage block of the database.
 	*/
@@ -36,8 +38,14 @@ namespace KDB::Primitives
 		virtual std::vector<char> getData() const override;
 		virtual int getSize() const override;
 
+		//returns the file id and the adjustment offset for this partition
+		std::pair<int, unsigned long long> getPartitionCoordinates() const;
+		unsigned long long getPartitionSize() const;
+
 		friend std::unique_ptr<PartitionDefinition> buildPartitionDefinition(std::fstream& stream);
+		friend void skipPartitionDefinition(std::fstream& stream);
 	};
 
 	std::unique_ptr<PartitionDefinition> buildPartitionDefinition(std::fstream& stream);
+	void skipPartitionDefinition(std::fstream& stream);
 }

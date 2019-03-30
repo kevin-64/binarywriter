@@ -63,7 +63,18 @@ namespace KDB::Primitives
 
 	int PartitionDefinition::getSize() const
 	{
-		return 22; //fixed as there are no variable-length fields
+		return PARTITION_RECORD_SIZE; //fixed as there are no variable-length fields
+	}
+
+	unsigned long long PartitionDefinition::getPartitionSize() const
+	{
+		return this->m_partitionSize;
+	}
+
+	std::pair<int, unsigned long long> PartitionDefinition::getPartitionCoordinates() const
+	{
+		//TODO: handle full partitions to avoid overwrites
+		return std::make_pair(this->m_fileId, this->m_ptrAdjOffset);
 	}
 
 	std::unique_ptr<PartitionDefinition> buildPartitionDefinition(std::fstream& stream)
@@ -81,5 +92,10 @@ namespace KDB::Primitives
 		Utilities::read_int64(stream, &ptrAdjOffset);
 
 		return std::make_unique<PartitionDefinition>(PartitionDefinition(partitionId, partitionSize, fileId, ptrAdjOffset));
+	}
+
+	void skipPartitionDefinition(std::fstream& stream)
+	{
+		stream.ignore(PARTITION_RECORD_SIZE - 1);
 	}
 }

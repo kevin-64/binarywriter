@@ -92,4 +92,10 @@ namespace KDB::Primitives
 
 		return std::make_unique<Pointer>(Pointer(PointerFormat(format), address, blockId, offset));
 	}
+
+	void skipPointer(std::fstream& stream, const PointerFormat& format)
+	{
+		unsigned long long total = format.AddressSize + format.BlockIdSize + format.OffsetSize;
+		stream.ignore(total);
+	}
 }

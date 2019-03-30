@@ -33,6 +33,11 @@ namespace KDB::Primitives
 		return *this;
 	}
 
+	const Guid& Object::getTypeId() const
+	{
+		return m_type->getTypeId();
+	}
+
 	/* Format of an "Object" record:
 	 * 0:	     Object record identifier (0x02)
 	 * 1-8:      Record size (RS)

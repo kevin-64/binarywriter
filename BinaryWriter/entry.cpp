@@ -117,11 +117,13 @@ void writeBlock(Core& core, const Guid& typeId)
 
 	Guid typeID(typeId);
 
+	unsigned long long blockOffset = 0;
+
 	std::vector<KDB::Primitives::PartitionDefinition*> parts;
-	auto part1 = new KDB::Primitives::PartitionDefinition(0, 0, 1, 0);
+	auto part1 = new KDB::Primitives::PartitionDefinition(0, 4096, 1, 0);
 	parts.emplace_back(part1);
 
-	KDB::Primitives::BlockDefinition bd(blockID, typeID, std::move(parts));
+	KDB::Primitives::BlockDefinition bd(blockID, blockOffset, typeID, std::move(parts));
 	core.addBlock(bd);
 }
 

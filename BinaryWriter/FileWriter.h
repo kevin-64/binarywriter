@@ -19,6 +19,8 @@ namespace KDB::Binary
 		std::string m_fileName;
 		std::fstream m_stream;
 		FileWriter() = default;
+
+		void skipRecord();
 	public:
 		FileWriter(KDB::Primitives::ConfigSettings* settings, std::string_view filename);
 		virtual ~FileWriter();
@@ -32,7 +34,10 @@ namespace KDB::Binary
 		FileWriter& operator=(FileWriter&&) noexcept;
 
 		bool writeRecord(const Contracts::IDBRecord& record);
+		bool writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit);
 		std::unique_ptr<Contracts::IDBRecord> readRecord(long long offset);
+
+		void allocatePartition(unsigned long long offset, unsigned long long size);
 
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockType(Guid typeId);
 		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(const std::string& typeName);

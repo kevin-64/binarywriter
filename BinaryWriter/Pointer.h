@@ -37,7 +37,9 @@ namespace KDB::Primitives
 		virtual int getSize() const override;
 
 		friend std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& ptrFormat);
+		friend void skipPointer(std::fstream& stream, const PointerFormat& format);
 	};
 
 	std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& ptrFormat);
+	void skipPointer(std::fstream& stream, const PointerFormat& format);
 }
