@@ -19,7 +19,7 @@ namespace KDB::Binary
 		: m_settings(settings), m_fileName(filename)
 	{
 		//we open the file in the ctor and it will stay open for the lifetime of the class for performance reasons
-		m_stream.open(m_fileName.c_str(), ios::binary | ios::in | ios::out | ios::app);
+		m_stream.open(m_fileName.c_str(), ios::binary | ios::in | ios::out);
 	}
 
 	FileWriter::~FileWriter()
@@ -66,6 +66,9 @@ namespace KDB::Binary
 		{
 			skipRecord();
 		}
+
+		//??? Why the hell is this necessary??? Aren't read/write operations sync'd in iostream??? And yet...
+		m_stream.seekp(m_stream.tellg());
 
 		//TODO: check whether there actually is enough space to write the whole record, not just if we are at the end
 		//if we reach/pass the end, there is no space to write the record

@@ -40,7 +40,7 @@ namespace KDB::Primitives
 
 	/* Format of an "Object" record:
 	 * 0:	     Object record identifier (0x02)
-	 * 1-8:      Record size (RS)
+	 * 1-4:      Record size (RS)
 	 *	         For each field:
 	 *			 0:        Field index (0x00-0xEF), empty field list (0xFD) or type entry (0xFE)
 	 *
@@ -89,12 +89,12 @@ namespace KDB::Primitives
 		for (char i = 0; i < m_type->getFieldCount(); i++)
 		{
 			auto& fieldDef = m_type->getField(i);
-			auto fieldSig = fieldDef.getFieldSignature();
-			const std::string& fieldName = fieldSig.first;
+			auto fieldType = fieldDef.getFieldType();
+			auto& fieldName = fieldDef.getFieldName();
 
 			//if a field is present, we immediately write it; if it is not, we keep track of it so that
 			//multiple missing fields can be written in a single empty list
-			auto fieldIt = m_attributes->find(fieldDef.getFieldSignature().first);
+			auto fieldIt = m_attributes->find(fieldName);
 			if (m_attributes->end() != fieldIt)
 			{
 				//when a field is present, we have to write any missing fields found before it
@@ -120,7 +120,7 @@ namespace KDB::Primitives
 				}
 
 				Utilities::push_char(data, i); //current field index
-				auto fieldSize = writeFieldData(data, fieldIt->second, static_cast<FieldType>(fieldSig.second));
+				auto fieldSize = writeFieldData(data, fieldIt->second, static_cast<FieldType>(fieldType));
 				size += 1 + fieldSize;
 			}
 			else
@@ -147,7 +147,7 @@ namespace KDB::Primitives
 	}
 
 	//utility function to write individual fields to the data vector
-	int Object::writeFieldData(std::vector<char> data, void* fieldData, FieldType fieldType) const
+	int Object::writeFieldData(std::vector<char>& data, void* fieldData, FieldType fieldType) const
 	{
 		int size;
 		switch (fieldType)

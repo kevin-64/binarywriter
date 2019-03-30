@@ -33,6 +33,8 @@ void seekBlock(Core&, Guid);
 
 void seekType(Core&, const std::string&);
 
+void writeObj(Core&, const Type* type);
+
 int main()
 {
 	auto start = std::chrono::system_clock::now();
@@ -40,14 +42,15 @@ int main()
 	Core core(R"(C:\Users\kevinik\Desktop\kdb_files.txt)");
 
 	//writeConf(core);
-	//writeDef(core);
+	//writeType(core);
 	auto tydef = dynamic_cast<KDB::Primitives::Type*>(readDef(core).release());
 	//seekBlock(core, tydef->getTypeId());
-	seekType(core, "MyType");
+	//seekType(core, "MyType");
 	//writeBlock(core, tydef->getTypeId());
 	//writePtr(core);
 	//readPtr(core);
 	//readBlock(core);
+	writeObj(core, tydef);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
@@ -141,4 +144,14 @@ void seekType(Core& core, const std::string& name)
 {
 	auto type = core.seekType(name);
 	const KDB::Contracts::IDBType* r = type.get();
+}
+
+void writeObj(Core& core, const Type* type)
+{
+	std::map<std::string, void*> attrs;
+	int value = 64;
+	attrs["MyField"] = &value;
+
+	auto obj = KDB::Primitives::Object(type, &attrs);
+	core.addRecord(obj);
 }

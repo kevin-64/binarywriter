@@ -148,7 +148,7 @@ namespace KDB::Binary
 		auto offset = part.first + coord.second;
 
 		auto limit = offset + size - 1;
-		m_storageFiles.at(coord.first).writeRecordAfterOffset(object, offset, limit);
+		m_storageFiles.at(coord.first - 1).writeRecordAfterOffset(object, offset, limit);
 	}
 
 	void Core::addPointer(const KDB::Primitives::Pointer& ptr)
@@ -169,8 +169,8 @@ namespace KDB::Binary
 		auto size = (blockOffsetAndPartition.second)->getPartitionSize();
 		auto offset = blockOffsetAndPartition.first + fileAndAdjustment.second;
 		
-		//the partition needs to be allocated before use
-		m_storageFiles.at(fileAndAdjustment.first).allocatePartition(offset, size);
+		//the partition needs to be allocated before use; the file ID is 1-based so it needs to be reduced
+		m_storageFiles.at(fileAndAdjustment.first - 1).allocatePartition(offset, size);
 
 		m_blocksFile->writeRecord(block);
 	}

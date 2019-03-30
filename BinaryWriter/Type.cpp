@@ -67,12 +67,13 @@ namespace KDB::Primitives
 		Utilities::push_char(data, static_cast<char>(this->m_fields.size()));
 		for (auto&& f : this->m_fields)
 		{
-			auto signature = f.getFieldSignature();
+			auto& fieldName = f.getFieldName();
+			auto fieldType = f.getFieldType();
 
-			Utilities::push_char(data, static_cast<char>(signature.first.length()));
-			Utilities::push_stringview(data, signature.first);
+			Utilities::push_char(data, static_cast<char>(fieldName.length()));
+			Utilities::push_stringview(data, fieldName);
 
-			Utilities::push_char(data, static_cast<char>(signature.second));
+			Utilities::push_char(data, static_cast<char>(fieldType));
 		}
 
 		return data;
@@ -89,8 +90,8 @@ namespace KDB::Primitives
 		size++;											//number of fields
 		for (auto&& f : this->m_fields)					
 		{
-			auto signature = f.getFieldSignature();
-			size += 1 + signature.first.length();		//length and characters of the field name
+			auto fieldName = f.getFieldName();
+			size += 1 + fieldName.length();				//length and characters of the field name
 			size++;										//type ID of the field
 		}
 

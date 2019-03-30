@@ -19,7 +19,7 @@ namespace KDB::Primitives
 		const std::map<std::string, void*>* m_attributes;
 		int m_size;
 
-		int writeFieldData(std::vector<char> data, void* fieldData, FieldType fieldType) const;
+		int writeFieldData(std::vector<char>& data, void* fieldData, FieldType fieldType) const;
 	public:
 		Object(const Type* type, const std::map<std::string, void*>* attributes);
 		virtual ~Object() = default;
