@@ -74,7 +74,8 @@ namespace KDB::Primitives
 	vector<char> Object::getData() const
 	{
 		vector<char> data;
-		int size = 1 + sizeof(int); //record ID + size of the size itself
+		int prefixSize = 1 + sizeof(int); //record ID + size of the size itself
+		int size = prefixSize;
 
 //disabilitiamo gli warning per il troncamento
 #pragma warning( disable : 4305 4309)
@@ -131,7 +132,7 @@ namespace KDB::Primitives
 		}
 
 		//the actual record size is written over the incorrect value previously used as a placeholder
-		Utilities::writeover_int(data, 1, size);
+		Utilities::writeover_int(data, 1, size-prefixSize);
 		return data;
 	}
 
@@ -142,8 +143,15 @@ namespace KDB::Primitives
 
 	std::unique_ptr<Object> buildObject(std::fstream& stream)
 	{
-		//TODO
+		
+
+
 		return nullptr;
+	}
+
+	void skipObject(std::fstream& stream)
+	{
+		//TODO
 	}
 
 	//utility function to write individual fields to the data vector

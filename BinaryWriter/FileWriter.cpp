@@ -6,6 +6,7 @@
 #include "Pointer.h"
 #include "BlockDefinition.h"
 #include "PartitionDefinition.h"
+#include "Object.h"
 #include "shortcuts.h"
 
 namespace KDB::Binary
@@ -103,6 +104,8 @@ namespace KDB::Binary
 				return buildBlockDefinition(m_stream);
 			case RecordType::BLOCK_PARTITION:
 				return buildPartitionDefinition(m_stream);
+			case RecordType::MAIN_RECORD:
+				return buildObject(m_stream);
 			//TODO: altri tipi di record
 		}
 	}
@@ -128,6 +131,8 @@ namespace KDB::Binary
 				skipBlockDefinition(m_stream);
 			case RecordType::BLOCK_PARTITION:
 				skipPartitionDefinition(m_stream);
+			case RecordType::MAIN_RECORD:
+				skipObject(m_stream);
 			//TODO: altri tipi di record
 		}
 	}

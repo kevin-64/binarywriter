@@ -40,7 +40,9 @@ namespace KDB::Primitives
 		const Guid& getTypeId() const;
 
 		friend std::unique_ptr<Object> buildObject(std::fstream& stream);
+		friend void skipObject(std::fstream& stream);
 	};
 
 	std::unique_ptr<Object> buildObject(std::fstream& stream);
+	void skipObject(std::fstream& stream);
 }
