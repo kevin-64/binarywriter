@@ -38,6 +38,7 @@ namespace KDB::Primitives
 		virtual int getSize() const override;
 
 		Guid getTypeId() const;
+		Guid getBlockId() const;
 
 		//returns the block offset and an available partition for this block
 		std::pair<unsigned long long, const PartitionDefinition*> getPartitionForWrite() const;

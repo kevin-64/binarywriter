@@ -58,7 +58,7 @@ namespace KDB::Binary
 		return true;
 	}
 
-	bool FileWriter::writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit)
+	unsigned long long FileWriter::writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit)
 	{
 		m_stream.seekp(offset);
 		
@@ -73,14 +73,16 @@ namespace KDB::Binary
 
 		//TODO: check whether there actually is enough space to write the whole record, not just if we are at the end
 		//if we reach/pass the end, there is no space to write the record
-		if (m_stream.tellp() >= limit)
+		auto currOffset = m_stream.tellp();
+		if (currOffset >= limit)
 		{
 			throw std::runtime_error("Could not write record due to full partition - scanned from " + std::to_string(offset) + " to " + std::to_string(limit) + ".");
 		}
 
 		writeRecord(record);
 
-		return true;
+		//the actual offset at which the record has been written is returned to allow a pointer to this location to be created
+		return currOffset;
 	}
 
 	std::unique_ptr<IDBRecord> FileWriter::readRecord(long long offset) 

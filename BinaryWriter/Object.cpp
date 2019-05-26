@@ -1,6 +1,8 @@
 #include "Object.h"
 #include "shortcuts.h"
 #include "Utilities.h"
+#include <fstream>
+#include <iostream>
 
 namespace KDB::Primitives
 {
@@ -143,7 +145,22 @@ namespace KDB::Primitives
 
 	std::unique_ptr<Object> buildObject(std::fstream& stream)
 	{
-		
+		int recordSize;
+		Utilities::read_int(stream, &recordSize);
+
+		unsigned char marker;
+		Utilities::read_char(stream, reinterpret_cast<char*>(&marker));
+
+		//regular field entry
+		if (marker <= 0xEF)
+		{
+			//TODO
+		}
+		else if (marker == EMPTY_FIELD_LIST_MARKER)
+		{
+			//TODO
+		}
+		//TODO: altri casi
 
 
 		return nullptr;
@@ -151,7 +168,10 @@ namespace KDB::Primitives
 
 	void skipObject(std::fstream& stream)
 	{
-		//TODO
+		int recordSize;
+		Utilities::read_int(stream, &recordSize);
+
+		stream.ignore(recordSize);
 	}
 
 	//utility function to write individual fields to the data vector

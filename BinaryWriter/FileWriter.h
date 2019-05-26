@@ -34,7 +34,7 @@ namespace KDB::Binary
 		FileWriter& operator=(FileWriter&&) noexcept;
 
 		bool writeRecord(const Contracts::IDBRecord& record);
-		bool writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit);
+		unsigned long long writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit);
 		std::unique_ptr<Contracts::IDBRecord> readRecord(long long offset);
 
 		void allocatePartition(unsigned long long offset, unsigned long long size);

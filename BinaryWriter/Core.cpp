@@ -136,7 +136,12 @@ namespace KDB::Binary
 		m_configFile->writeRecord(entry);
 	}
 
-	void Core::addRecord(const KDB::Primitives::Object& object)
+	//std::unique_ptr<KDB::Contracts::IDBRecord> Core::getRecord()
+	//{
+	//	//TODO
+	//}
+
+	std::unique_ptr<KDB::Contracts::IDBPointer> Core::addRecord(const KDB::Primitives::Object& object)
 	{
 		auto typeId = object.getTypeId();
 		auto block = seekBlock(typeId);
@@ -148,7 +153,13 @@ namespace KDB::Binary
 		auto offset = part.first + coord.second;
 
 		auto limit = offset + size - 1;
-		m_storageFiles.at(coord.first - 1).writeRecordAfterOffset(object, offset, limit);
+		auto writeOffset = m_storageFiles.at(coord.first - 1).writeRecordAfterOffset(object, offset, limit);
+		
+		//a new address is generated for the new record, to be stored in the pointer table
+		auto address = createAddress();
+		auto ptr = KDB::Primitives::Pointer(m_settings.PointerFormat, address, block->getBlockId(), writeOffset - offset);
+		addPointer(ptr);
+		return std::make_unique<KDB::Primitives::Pointer>(std::move(ptr));
 	}
 
 	void Core::addPointer(const KDB::Primitives::Pointer& ptr)
@@ -163,6 +174,7 @@ namespace KDB::Binary
 
 	void Core::addBlock(const KDB::Primitives::BlockDefinition& block)
 	{
+		//info about the first partition for the block is extracted in order to create it as requested
 		auto blockOffsetAndPartition = block.getPartitionForWrite();
 		auto fileAndAdjustment = (blockOffsetAndPartition.second)->getPartitionCoordinates();
 
@@ -191,12 +203,13 @@ namespace KDB::Binary
 
 		record = m_configFile->readRecord(offset);
 		cfgEntry = dynamic_cast<KDB::Primitives::ConfigEntry*>(record.get());
-		m_settings.PointerFormat.BlockIdSize = cfgEntry->getIntValue();
-		offset += cfgEntry->getSize();
-
-		record = m_configFile->readRecord(offset);
-		cfgEntry = dynamic_cast<KDB::Primitives::ConfigEntry*>(record.get());
 		m_settings.PointerFormat.OffsetSize = cfgEntry->getIntValue();
+	}
+
+	//TODO: controllare conflitti con gli indirizzi esistenti (bisogna mantenere la tavola dei puntatori)
+	unsigned long long Core::createAddress()
+	{
+		return rand() * 10000;
 	}
 
 	std::unique_ptr<KDB::Primitives::BlockDefinition> Core::seekBlock(Guid typeId)

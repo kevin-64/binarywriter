@@ -50,7 +50,7 @@ int main()
 	//writePtr(core);
 	//readPtr(core);
 	//readBlock(core);
-	//writeObj(core, tydef);
+	writeObj(core, tydef);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
@@ -100,12 +100,12 @@ void readConf(Core& core)
 	auto record = core.getConfigEntry(0);
 }
 
-void writePtr(Core& core)
-{
-	auto fmt = KDB::Primitives::PointerFormat{ 4, 2, 4 };
-	auto ptr = KDB::Primitives::Pointer(fmt, 0xFFFFEEEE, 0xAABB, 0x11223344);
-	core.addPointer(ptr);
-}
+//void writePtr(Core& core)
+//{
+//	auto fmt = KDB::Primitives::PointerFormat{ 4, 4 };
+//	auto ptr = KDB::Primitives::Pointer(fmt, 0xFFFFEEEE, 0xAABB, 0x11223344);
+//	core.addPointer(ptr);
+//}
 
 void readPtr(Core& core)
 {

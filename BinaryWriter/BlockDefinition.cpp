@@ -101,8 +101,14 @@ namespace KDB::Primitives
 		return this->m_mainTypeId;
 	}
 
+	Guid BlockDefinition::getBlockId() const 
+	{
+		return this->m_blockId;
+	}
+
 	std::pair<unsigned long long, const PartitionDefinition*> BlockDefinition::getPartitionForWrite() const
 	{
+		//TODO: handle multiple partitions
 		return std::make_pair(this->m_blockOffset, this->m_partitions.at(0));
 	}
 

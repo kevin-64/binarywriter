@@ -19,7 +19,7 @@ namespace KDB::Primitives
 	{
 	}
 
-	Pointer::Pointer(PointerFormat format, int64 address, int64 blockId, int64 offset)
+	Pointer::Pointer(PointerFormat format, int64 address, Guid blockId, int64 offset)
 		: m_size(0), m_format(format), m_address(address), m_blockId(blockId), m_offset(offset)
 	{
 		this->m_size = getSize();
@@ -54,13 +54,15 @@ namespace KDB::Primitives
 	{
 		std::vector<char> data;
 
+		auto serGuid = m_blockId.serialize();
+
 //disabilitiamo gli warning per il troncamento
 #pragma warning( disable : 4305 4309)
 		data.push_back(RecordType::POINTER_RECORD);
 		
 		//at the moment only sizes 2, 4 or 8 are supported:
 		Utilities::push_varint(data, this->m_address, this->m_format.AddressSize);
-		Utilities::push_varint(data, this->m_blockId, this->m_format.BlockIdSize);
+		Utilities::push_vector(data, serGuid);
 		Utilities::push_varint(data, this->m_offset,  this->m_format.OffsetSize);
 
 		return data;
@@ -72,30 +74,35 @@ namespace KDB::Primitives
 		if (this->m_size != 0)
 			return this->m_size;
 
-		auto size = 1;	//record type
+		auto size = 17;	//record type + block ID size (16 for a GUID)
 		size += this->m_format.AddressSize;
-		size += this->m_format.BlockIdSize;
 		size += this->m_format.OffsetSize;
 
 		return size;
 	}
 
+	unsigned long long Pointer::getAddress() const
+	{
+		return this->m_address;
+	}
+
 	std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& format)
 	{
 		unsigned long long address;
-		unsigned long long blockId;
+		GUID blockId;
 		unsigned long long offset;
 		
 		Utilities::read_varint(stream, &address, format.AddressSize);
-		Utilities::read_varint(stream, &blockId, format.BlockIdSize);
+		Utilities::read_GUID(stream, &blockId);
 		Utilities::read_varint(stream, &offset,  format.OffsetSize);
 
-		return std::make_unique<Pointer>(Pointer(PointerFormat(format), address, blockId, offset));
+		return std::make_unique<Pointer>(Pointer(PointerFormat(format), address, Guid(std::move(blockId)), offset));
 	}
 
 	void skipPointer(std::fstream& stream, const PointerFormat& format)
 	{
-		unsigned long long total = format.AddressSize + format.BlockIdSize + format.OffsetSize;
+		//16 is the size of a GUID
+		unsigned long long total = format.AddressSize + 16 + format.OffsetSize;
 		stream.ignore(total);
 	}
 }

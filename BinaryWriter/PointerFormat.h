@@ -5,7 +5,6 @@ namespace KDB::Primitives
 	struct PointerFormat
 	{
 		char AddressSize;
-		char BlockIdSize;
 		char OffsetSize;
 	};
 }

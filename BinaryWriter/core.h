@@ -3,6 +3,7 @@
 #include "FileWriter.h"
 #include "IDBRecord.h"
 #include "IDBType.h"
+#include "IDBPointer.h"
 #include "ConfigEntry.h"
 #include "Pointer.h"
 #include "PointerFormat.h"
@@ -29,6 +30,7 @@ namespace KDB::Binary {
 		std::vector<FileWriter> m_indexFiles;
 
 		void readConfiguration();
+		unsigned long long createAddress();
 	public:
 		Core(const std::string& definitionFilePath);
 		virtual ~Core();
@@ -53,7 +55,7 @@ namespace KDB::Binary {
 		std::unique_ptr<KDB::Contracts::IDBRecord> getBlock(long long offset);
 		void addBlock(const KDB::Primitives::BlockDefinition& block);
 
-		void addRecord(const KDB::Primitives::Object& object);
+		std::unique_ptr<KDB::Contracts::IDBPointer> addRecord(const KDB::Primitives::Object& object);
 
 		//temporanea: nella versione finale il chiamante non ha necessità di conoscere il blocco
 		std::unique_ptr<KDB::Primitives::BlockDefinition> seekBlock(Guid typeId);

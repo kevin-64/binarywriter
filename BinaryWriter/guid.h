@@ -3,6 +3,7 @@
 #include <objbase.h>
 #include <memory>
 #include <vector>
+#include <string>
 
 class Guid
 {

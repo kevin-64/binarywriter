@@ -1,3 +1,6 @@
+- Lettura record da puntatore
+- Ricerca record su condizioni sui campi
+
 - Modifica record
 - Eliminazione record
 

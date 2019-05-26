@@ -7,9 +7,9 @@
 
 namespace KDB::Primitives
 {
-	const char EMPTY_FIELD_LIST_MARKER = static_cast<char>(0xFD);
-	const char EMPTY_SINGLE_FIELD_MARKER = static_cast<char>(0xFF);
-	const char LONG_RECORD_MARKER = static_cast<char>(0xE0);
+	const unsigned char EMPTY_FIELD_LIST_MARKER = 0xFD;
+	const unsigned char EMPTY_SINGLE_FIELD_MARKER = 0xFF;
+	const unsigned char LONG_RECORD_MARKER = 0xE0;
 
 	class Object : public Contracts::IDBRecord
 	{
