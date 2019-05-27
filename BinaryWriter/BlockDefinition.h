@@ -43,6 +43,9 @@ namespace KDB::Primitives
 		//returns the block offset and an available partition for this block
 		std::pair<unsigned long long, const PartitionDefinition*> getPartitionForWrite() const;
 
+		//returns the file ID and the offset within that file at which the record with the given offset can be found
+		std::pair<int, unsigned long long> getOffsetForRecord(unsigned long long recordOffset);
+
 		friend std::unique_ptr<BlockDefinition> buildBlockDefinition(std::fstream& stream);
 		friend void skipBlockDefinition(std::fstream& stream);
 	};

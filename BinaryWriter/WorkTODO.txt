@@ -1,5 +1,8 @@
-- Lettura record da puntatore
-- Ricerca record su condizioni sui campi
+- Costruzione record
+- Mappa di blocchi in memoria
+- Ricerca record su condizioni sui campi (prim. indirizzi)
+- Generazione indirizzi corretta
+- Gestione partizioni multiple
 
 - Modifica record
 - Eliminazione record

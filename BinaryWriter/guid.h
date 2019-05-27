@@ -23,6 +23,10 @@ public:
 	Guid(const Guid& other);
 	Guid& operator=(const Guid& rhs);
 
+	friend Guid GuidEmpty();
+
 	std::string toString() const;
 	std::vector<char> serialize() const;
 };
+
+Guid GuidEmpty();

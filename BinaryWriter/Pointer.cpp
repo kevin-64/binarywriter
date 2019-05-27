@@ -86,6 +86,16 @@ namespace KDB::Primitives
 		return this->m_address;
 	}
 
+	Guid Pointer::getBlockId() const
+	{
+		return this->m_blockId;
+	}
+
+	unsigned long long Pointer::getOffset() const
+	{
+		return this->m_offset;
+	}
+
 	std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& format)
 	{
 		unsigned long long address;

@@ -49,6 +49,8 @@ namespace KDB::Binary {
 		std::unique_ptr<KDB::Contracts::IDBRecord> getConfigEntry(long long offset);
 		void addConfigEntry(const KDB::Primitives::ConfigEntry& entry);
 
+		std::unique_ptr<KDB::Contracts::IDBRecord> getRecord(KDB::Contracts::IDBPointer& ptr);
+
 		std::unique_ptr<KDB::Contracts::IDBRecord> getPointer(long long offset);
 		void addPointer(const KDB::Primitives::Pointer& ptr);
 

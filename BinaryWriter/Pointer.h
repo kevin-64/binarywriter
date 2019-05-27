@@ -39,6 +39,9 @@ namespace KDB::Primitives
 
 		virtual unsigned long long getAddress() const override;
 
+		Guid getBlockId() const;
+		unsigned long long getOffset() const;
+
 		friend std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& ptrFormat);
 		friend void skipPointer(std::fstream& stream, const PointerFormat& format);
 	};

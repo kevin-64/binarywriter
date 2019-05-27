@@ -112,6 +112,24 @@ namespace KDB::Primitives
 		return std::make_pair(this->m_blockOffset, this->m_partitions.at(0));
 	}
 
+	std::pair<int, unsigned long long> BlockDefinition::getOffsetForRecord(unsigned long long recordOffset)
+	{
+		auto accum = 0ULL;
+
+		for (auto p : this->m_partitions)
+		{
+			accum += p->getPartitionSize();
+			if (recordOffset < accum)
+			{
+				//this is the correct partition; the file id and the offset within the file are returned as a pair
+				auto coord = p->getPartitionCoordinates();
+				return std::make_pair(coord.first, this->m_blockOffset + coord.second + recordOffset);
+			}
+		}
+
+		throw std::runtime_error("Record offset beyond all partitions in the given block.");
+	}
+
 	std::unique_ptr<BlockDefinition> buildBlockDefinition(std::fstream& stream)
 	{
 		GUID guid;

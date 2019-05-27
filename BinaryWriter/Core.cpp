@@ -136,10 +136,22 @@ namespace KDB::Binary
 		m_configFile->writeRecord(entry);
 	}
 
-	//std::unique_ptr<KDB::Contracts::IDBRecord> Core::getRecord()
-	//{
-	//	//TODO
-	//}
+	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getRecord(KDB::Contracts::IDBPointer& ptr)
+	{
+		auto realPtr = dynamic_cast<KDB::Primitives::Pointer*>(&ptr);
+		//TODO: trovare il vero blocco e l'offset nel file dei puntatori; per ora viene passato nell'oggetto puntatore
+		//auto blockId = realPtr->getBlockId();
+		auto startOffset = realPtr->getOffset();
+
+		//TODO: conversione tramite mappa dei blocchi in memoria; per ora usiamo sempre il blocco 0
+		auto blockOffset = 0; //getBlockFromId(blockId)
+		auto upBlock = this->getBlock(blockOffset);
+		auto pRecord = upBlock.get();
+		auto block = dynamic_cast<KDB::Primitives::BlockDefinition*>(pRecord);
+		auto fileAndOffset = block->getOffsetForRecord(startOffset);
+
+		return m_storageFiles.at(fileAndOffset.first - 1).readRecord(fileAndOffset.second);
+	}
 
 	std::unique_ptr<KDB::Contracts::IDBPointer> Core::addRecord(const KDB::Primitives::Object& object)
 	{

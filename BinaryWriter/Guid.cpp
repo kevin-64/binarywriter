@@ -92,3 +92,22 @@ vector<char> Guid::serialize() const
 	return v;
 }
 
+Guid GuidEmpty()
+{
+	Guid newGuid;
+	newGuid.m_guid.Data1 = 0UL;
+	newGuid.m_guid.Data2 = (unsigned short)0;
+	newGuid.m_guid.Data3 = (unsigned short)0;
+
+	newGuid.m_guid.Data4[0] = (unsigned char)0;
+	newGuid.m_guid.Data4[1] = (unsigned char)0;
+	newGuid.m_guid.Data4[2] = (unsigned char)0;
+	newGuid.m_guid.Data4[3] = (unsigned char)0;
+	newGuid.m_guid.Data4[4] = (unsigned char)0;
+	newGuid.m_guid.Data4[5] = (unsigned char)0;
+	newGuid.m_guid.Data4[6] = (unsigned char)0;
+	newGuid.m_guid.Data4[7] = (unsigned char)0;
+
+	return newGuid;
+}
+
