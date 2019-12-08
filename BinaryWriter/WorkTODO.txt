@@ -1,4 +1,4 @@
-- Costruzione record
+- Costruzione record (in corso)
 - Mappa di blocchi in memoria
 - Ricerca record su condizioni sui campi (prim. indirizzi)
 - Generazione indirizzi corretta

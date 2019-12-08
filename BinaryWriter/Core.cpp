@@ -1,3 +1,6 @@
+//problemi di overflow tra int e size_t
+#pragma warning( disable : 26451)
+
 #include "core.h"
 #include "shortcuts.h"
 #include <istream>
@@ -23,7 +26,8 @@ namespace KDB::Binary
 	#pragma endregion
 
 	Core::Core(const std::string& definitionFilePath)
-		: m_configFile(nullptr), m_typesFile(nullptr), m_ptrFile(nullptr), m_diaryFile(nullptr), m_tempFile(nullptr)
+		: m_settings(), m_blocksFile(nullptr),
+		  m_configFile(nullptr), m_typesFile(nullptr), m_ptrFile(nullptr), m_diaryFile(nullptr), m_tempFile(nullptr)
 	{
 		std::ifstream definitionFile(definitionFilePath);
 

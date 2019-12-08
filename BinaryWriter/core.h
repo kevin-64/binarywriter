@@ -59,7 +59,7 @@ namespace KDB::Binary {
 
 		std::unique_ptr<KDB::Contracts::IDBPointer> addRecord(const KDB::Primitives::Object& object);
 
-		//temporanea: nella versione finale il chiamante non ha necessit‡ di conoscere il blocco
+		//temporanea: nella versione finale il chiamante non ha necessit√† di conoscere il blocco
 		std::unique_ptr<KDB::Primitives::BlockDefinition> seekBlock(Guid typeId);
 
 		std::unique_ptr<KDB::Contracts::IDBType> seekType(const std::string& typeName);

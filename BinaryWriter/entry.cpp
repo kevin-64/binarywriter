@@ -42,7 +42,7 @@ int main()
 {
 	auto start = std::chrono::system_clock::now();
 
-	Core core(R"(C:\Users\kevinik\Desktop\kdb_files.txt)");
+	Core core(R"(C:\Users\kevin\Desktop\kdb_files.txt)");
 
 	//writeConf(core);
 	//writeType(core);
@@ -163,7 +163,7 @@ void writeObj(Core& core, const Type* type)
 void readObj(Core& core)
 {
 	auto fmt = KDB::Primitives::PointerFormat{ 4, 4 };
-	KDB::Primitives::Pointer ptr(fmt, 0 /* al momento non è usato */, GuidEmpty() /* al momento non è usato */, 0);
+	KDB::Primitives::Pointer ptr(fmt, 0 /* al momento non usato */, GuidEmpty() /* al momento non usato */, 0);
 	auto record = core.getRecord(ptr);
 	auto i = 0;
 }

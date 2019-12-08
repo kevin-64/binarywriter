@@ -8,8 +8,12 @@
 namespace KDB::Primitives
 {
 	const unsigned char EMPTY_FIELD_LIST_MARKER = 0xFD;
-	const unsigned char EMPTY_SINGLE_FIELD_MARKER = 0xFF;
+	const unsigned char TYPE_ENTRY_MARKER = 0xFE;
+
 	const unsigned char LONG_RECORD_MARKER = 0xE0;
+	const unsigned char EMBEDDED_RECORD_MARKER = 0xFD;
+	const unsigned char REMOTE_RECORD_MARKER = 0xFE;
+	const unsigned char EMPTY_SINGLE_FIELD_MARKER = 0xFF;
 
 	class Object : public Contracts::IDBRecord
 	{

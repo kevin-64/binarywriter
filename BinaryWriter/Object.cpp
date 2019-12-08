@@ -65,6 +65,7 @@ namespace KDB::Primitives
 	 *			 V)		For long fields:
 	 *			 1		   Long field marker (0xE0)
 	 *			 2-5	   Field record size (FRS)
+	 *			 6-FRS+5   Field data
 	 *
 	 *			 VI)	For empty field lists:
 	 *			 1		   First empty field index (inclusive)
@@ -145,23 +146,73 @@ namespace KDB::Primitives
 
 	std::unique_ptr<Object> buildObject(std::fstream& stream)
 	{
+		std::map<int, void*> fieldData;
+
 		int recordSize;
 		Utilities::read_int(stream, &recordSize);
+		
+		int totalRead = 0;
 
-		unsigned char marker;
-		Utilities::read_char(stream, reinterpret_cast<char*>(&marker));
-
-		//regular field entry
-		if (marker <= 0xEF)
+		while (totalRead < recordSize) 
 		{
-			//TODO
-		}
-		else if (marker == EMPTY_FIELD_LIST_MARKER)
-		{
-			//TODO
-		}
-		//TODO: altri casi
+			unsigned char marker;
+			Utilities::read_char(stream, reinterpret_cast<char*>(&marker));
+			totalRead++;
 
+			//regular field entry
+			if (marker <= 0xEF)
+			{
+				auto fieldIndex = marker;
+				totalRead++;
+
+				//internal marker
+				Utilities::read_char(stream, reinterpret_cast<char*>(&marker));
+				if (marker == EMPTY_SINGLE_FIELD_MARKER)
+				{
+					fieldData[fieldIndex] = nullptr;
+					totalRead++;
+				}
+				else if (marker == EMBEDDED_RECORD_MARKER)
+				{
+					//TODO
+				}
+				else
+				{
+					//long field marker
+					int recordSize;
+					Utilities::read_char(stream, reinterpret_cast<char*>(&marker));
+					totalRead++;
+					if (marker == LONG_RECORD_MARKER)
+					{
+						Utilities::read_int(stream, &recordSize);
+						totalRead += 4;
+					}
+					else
+						recordSize = (int)marker;
+					
+					auto data = new char[recordSize];
+					stream.read(data, recordSize);
+					fieldData[fieldIndex] = data;
+					totalRead += recordSize;
+				}
+			}
+			else if (marker == EMPTY_FIELD_LIST_MARKER)
+			{
+				unsigned char startIndex;
+				unsigned char endIndex;
+				Utilities::read_char(stream, reinterpret_cast<char*>(&startIndex));
+				Utilities::read_char(stream, reinterpret_cast<char*>(&endIndex));
+				for (auto i = startIndex; i <= endIndex; i++)
+					fieldData[i] = nullptr;
+				totalRead += 2;
+			}
+			else if (marker == TYPE_ENTRY_MARKER)
+			{
+				//TODO - forse non serve nemmeno...
+			}
+		}
+
+		//TODO: convertire gli indici nei nomi delle colonne corrispondenti
 
 		return nullptr;
 	}
@@ -192,7 +243,7 @@ namespace KDB::Primitives
 				Utilities::push_char(data, LONG_RECORD_MARKER);
 				size = *reinterpret_cast<int*>(fieldData); //each string first contains its size
 				Utilities::push_int(data, size);
-				Utilities::push_memory(data, size, sizeof(int) + reinterpret_cast<char*>(fieldData));
+				Utilities::push_memory(data, size, sizeof(int) + reinterpret_cast<char*>(fieldData)); //we skip the size here
 				return 1 + sizeof(int) + size;
 			case FieldType::UUID:
 				data.push_back(16);
