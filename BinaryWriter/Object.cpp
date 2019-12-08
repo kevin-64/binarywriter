@@ -13,10 +13,16 @@ namespace KDB::Primitives
 		std::swap(lhs.m_size, rhs.m_size);
 	}
 
-	Object::Object(const Type* type, const map<string, void*>* attributes)
+	Object::Object(const Type* type, map<string, void*>&& attributes)
 		: m_type(type), m_attributes(attributes), m_size(0)
 	{
 		m_size = getSize();
+	}
+
+	Object::~Object()
+	{
+		if (m_type != nullptr)
+			delete m_type;
 	}
 
 	Object::Object(Object&& other) noexcept
@@ -98,8 +104,8 @@ namespace KDB::Primitives
 
 			//if a field is present, we immediately write it; if it is not, we keep track of it so that
 			//multiple missing fields can be written in a single empty list
-			auto fieldIt = m_attributes->find(fieldName);
-			if (m_attributes->end() != fieldIt)
+			auto fieldIt = m_attributes.find(fieldName);
+			if (m_attributes.end() != fieldIt)
 			{
 				//when a field is present, we have to write any missing fields found before it
 				if (beginEmpty != -1)
@@ -144,7 +150,7 @@ namespace KDB::Primitives
 		return 0; //the size can only be dynamically determined by getData() and is not known here
 	}
 
-	std::unique_ptr<Object> buildObject(std::fstream& stream)
+	std::unique_ptr<Object> buildObject(std::fstream& stream, KDB::Primitives::Type* type)
 	{
 		std::map<int, void*> fieldData;
 
@@ -163,7 +169,6 @@ namespace KDB::Primitives
 			if (marker <= 0xEF)
 			{
 				auto fieldIndex = marker;
-				totalRead++;
 
 				//internal marker
 				Utilities::read_char(stream, reinterpret_cast<char*>(&marker));
@@ -174,20 +179,22 @@ namespace KDB::Primitives
 				}
 				else if (marker == EMBEDDED_RECORD_MARKER)
 				{
-					//TODO
+					//TODO #morrec
+				}
+				else if (marker == REMOTE_RECORD_MARKER)
+				{
+					//TODO #morrec
 				}
 				else
 				{
 					//long field marker
 					int recordSize;
-					Utilities::read_char(stream, reinterpret_cast<char*>(&marker));
-					totalRead++;
 					if (marker == LONG_RECORD_MARKER)
 					{
 						Utilities::read_int(stream, &recordSize);
 						totalRead += 4;
 					}
-					else
+					else //regular field
 						recordSize = (int)marker;
 					
 					auto data = new char[recordSize];
@@ -212,9 +219,12 @@ namespace KDB::Primitives
 			}
 		}
 
-		//TODO: convertire gli indici nei nomi delle colonne corrispondenti
+		//conversion of field indexes to field names
+		std::map<std::string, void*> data;
+		for (const auto& kvp : fieldData)
+			data[type->getField(kvp.first).getFieldName()] = kvp.second;
 
-		return nullptr;
+		return std::make_unique<Object>(type, std::move(data));
 	}
 
 	void skipObject(std::fstream& stream)

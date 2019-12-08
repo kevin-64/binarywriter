@@ -1,11 +1,17 @@
-- Costruzione record (in corso)
-- Mappa di blocchi in memoria
-- Ricerca record su condizioni sui campi (prim. indirizzi)
+RECORD SEEKING
+- Ricerca puntatori per indirizzo
 - Generazione indirizzi corretta
-- Gestione partizioni multiple
 
+RECORD WRITING
 - Modifica record
 - Eliminazione record
 
+AVANZATE:
+- #fulprt Gestione partizioni piene e partizioni multiple
+- Ricerca record su condizioni sui campi
+- #morrec Record remoti ed embedded
+
+MISC.
+- Possibili leak: Type in Object
 - Riordino eccezioni
 - Pulizia interfaccia Core

@@ -156,7 +156,7 @@ void writeObj(Core& core, const Type* type)
 	int value = 64;
 	attrs["MyField"] = &value;
 
-	auto obj = KDB::Primitives::Object(type, &attrs);
+	auto obj = KDB::Primitives::Object(type, std::move(attrs));
 	auto ptr = core.addRecord(obj);
 }
 

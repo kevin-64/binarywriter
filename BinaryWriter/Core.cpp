@@ -147,14 +147,17 @@ namespace KDB::Binary
 		//auto blockId = realPtr->getBlockId();
 		auto startOffset = realPtr->getOffset();
 
-		//TODO: conversione tramite mappa dei blocchi in memoria; per ora usiamo sempre il blocco 0
+		//TODO: conversione tramite lista dei blocchi; per ora usiamo sempre il primo blocco della lista
 		auto blockOffset = 0; //getBlockFromId(blockId)
 		auto upBlock = this->getBlock(blockOffset);
 		auto pRecord = upBlock.get();
 		auto block = dynamic_cast<KDB::Primitives::BlockDefinition*>(pRecord);
 		auto fileAndOffset = block->getOffsetForRecord(startOffset);
 
-		return m_storageFiles.at(fileAndOffset.first - 1).readRecord(fileAndOffset.second);
+		auto type = m_typesFile->scanForTypeDefinition(block->getTypeId());
+		auto realType = dynamic_cast<KDB::Primitives::Type*>(type.release());
+
+		return m_storageFiles.at(fileAndOffset.first - 1).readRecord(fileAndOffset.second, realType);
 	}
 
 	std::unique_ptr<KDB::Contracts::IDBPointer> Core::addRecord(const KDB::Primitives::Object& object)

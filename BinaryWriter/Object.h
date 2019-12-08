@@ -20,13 +20,13 @@ namespace KDB::Primitives
 	private:
 		Object() = default;
 		const Type* m_type;
-		const std::map<std::string, void*>* m_attributes;
+		std::map<std::string, void*> m_attributes;
 		int m_size;
 
 		int writeFieldData(std::vector<char>& data, void* fieldData, FieldType fieldType) const;
 	public:
-		Object(const Type* type, const std::map<std::string, void*>* attributes);
-		virtual ~Object() = default;
+		Object(const Type* type, std::map<std::string, void*>&& attributes);
+		virtual ~Object();
 
 		friend void swapObjects(Object& lhs, Object& rhs) noexcept;
 
@@ -43,10 +43,10 @@ namespace KDB::Primitives
 		
 		const Guid& getTypeId() const;
 
-		friend std::unique_ptr<Object> buildObject(std::fstream& stream);
+		friend std::unique_ptr<Object> buildObject(std::fstream& stream, KDB::Primitives::Type* type);
 		friend void skipObject(std::fstream& stream);
 	};
 
-	std::unique_ptr<Object> buildObject(std::fstream& stream);
+	std::unique_ptr<Object> buildObject(std::fstream& stream, KDB::Primitives::Type* type);
 	void skipObject(std::fstream& stream);
 }

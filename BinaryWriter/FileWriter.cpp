@@ -71,7 +71,7 @@ namespace KDB::Binary
 		//??? Why the hell is this necessary??? Aren't read/write operations sync'd in iostream??? And yet...
 		m_stream.seekp(m_stream.tellg());
 
-		//TODO: check whether there actually is enough space to write the whole record, not just if we are at the end
+		//TODO: #fulprt check whether there actually is enough space to write the whole record, not just if we are at the end
 		//if we reach/pass the end, there is no space to write the record
 		auto currOffset = m_stream.tellp();
 		if (currOffset >= limit)
@@ -85,16 +85,20 @@ namespace KDB::Binary
 		return currOffset;
 	}
 
-	std::unique_ptr<IDBRecord> FileWriter::readRecord(long long offset) 
+	std::unique_ptr<IDBRecord> FileWriter::readRecord(long long offset) {
+		return this->readRecord(offset, nullptr);
+	}
+
+	std::unique_ptr<IDBRecord> FileWriter::readRecord(long long offset, KDB::Primitives::Type* objectType)
 	{
 		m_stream.seekg(offset);
 
 		char recordType;
 		m_stream.read(&recordType, 1);
 
-		auto type = reinterpret_cast<unsigned char*>(&recordType);
+		auto rType = reinterpret_cast<unsigned char*>(&recordType);
 
-		switch (*type)
+		switch (*rType)
 		{
 			case RecordType::TYPE_DEFINITION:
 				return buildType(m_stream);
@@ -107,7 +111,7 @@ namespace KDB::Binary
 			case RecordType::BLOCK_PARTITION:
 				return buildPartitionDefinition(m_stream);
 			case RecordType::MAIN_RECORD:
-				return buildObject(m_stream);
+				return buildObject(m_stream, objectType);
 			//TODO: altri tipi di record
 		}
 	}
@@ -193,5 +197,25 @@ namespace KDB::Binary
 		} while (m_stream.peek() != EOF);
 
 		throw std::runtime_error("Type {" + typeName + "} has not been recognized.");
+	}
+
+	std::unique_ptr<Contracts::IDBType> FileWriter::scanForTypeDefinition(Guid typeId) 
+	{
+		char recordType;
+		m_stream.seekg(0);
+
+		do
+		{
+			m_stream.read(&recordType, 1);
+			auto type = reinterpret_cast<unsigned char*>(&recordType);
+			if (RecordType::TYPE_DEFINITION != *type)
+				throw std::runtime_error("Internal error: invalid record type " + std::to_string(*type) + " while scanning types.");
+
+			auto t = buildType(m_stream);
+			if (t->getTypeId() == typeId)
+				return t;
+		} while (m_stream.peek() != EOF);
+
+		throw std::runtime_error("Type {" + typeId.toString() + "} has not been recognized.");
 	}
 }
