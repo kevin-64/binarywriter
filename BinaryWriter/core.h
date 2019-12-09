@@ -11,7 +11,7 @@
 #include "Object.h"
 #include <string>
 #include <vector>
-#include <map>
+#include <random>
 
 namespace KDB::Binary {
 	class Core final
@@ -28,6 +28,8 @@ namespace KDB::Binary {
 
 		std::vector<FileWriter> m_storageFiles;
 		std::vector<FileWriter> m_indexFiles;
+
+		std::mt19937 m_rng;
 
 		void readConfiguration();
 		unsigned long long createAddress();

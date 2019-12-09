@@ -23,6 +23,7 @@ namespace KDB::Binary
 		FileWriter() = default;
 
 		void skipRecord();
+		bool writeRecordAtCurrPosition(const Contracts::IDBRecord& record);
 	public:
 		FileWriter(KDB::Primitives::ConfigSettings* settings, std::string_view filename);
 		virtual ~FileWriter();
@@ -35,8 +36,9 @@ namespace KDB::Binary
 		FileWriter(FileWriter&&) noexcept;
 		FileWriter& operator=(FileWriter&&) noexcept;
 
-		bool writeRecord(const Contracts::IDBRecord& record);
+		bool writeRecordAfterLast(const Contracts::IDBRecord& record);
 		unsigned long long writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit);
+
 		std::unique_ptr<Contracts::IDBRecord> readRecord(long long offset);
 		std::unique_ptr<Contracts::IDBRecord> readRecord(long long offset, KDB::Primitives::Type* objectType);
 
@@ -46,6 +48,6 @@ namespace KDB::Binary
 		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(const std::string& typeName);
 		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(Guid typeId);
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockId(Guid blockId);
-		std::unique_ptr<Contracts::IDBPointer> scanForPointer(unsigned long long address);
+		std::unique_ptr<Contracts::IDBPointer> scanForPointer(unsigned long long address, bool throwIfNoMatch);
 	};
 }

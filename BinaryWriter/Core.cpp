@@ -127,7 +127,7 @@ namespace KDB::Binary
 
 	void Core::addType(const KDB::Contracts::IDBType& type) 
 	{
-		m_typesFile->writeRecord(type);
+		m_typesFile->writeRecordAfterLast(type);
 	}
 
 	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getConfigEntry(long long offset)
@@ -137,7 +137,7 @@ namespace KDB::Binary
 
 	void Core::addConfigEntry(const KDB::Primitives::ConfigEntry& entry)
 	{
-		m_configFile->writeRecord(entry);
+		m_configFile->writeRecordAfterLast(entry);
 	}
 
 	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getRecord(KDB::Contracts::IDBPointer& ptr)
@@ -151,7 +151,7 @@ namespace KDB::Binary
 			blockId = realPtr->getBlockId();
 		} else {
 			//if the pointer is incomplete (client-side), its value needs to be fetched from the pointers file
-			auto ptrDef = m_ptrFile->scanForPointer(realPtr->getAddress());
+			auto ptrDef = m_ptrFile->scanForPointer(realPtr->getAddress(), true);
 			auto realPtrDef = dynamic_cast<KDB::Primitives::Pointer*>(ptrDef.get());
 			startOffset = realPtrDef->getOffset();
 			blockId = realPtrDef->getBlockId();
@@ -190,7 +190,7 @@ namespace KDB::Binary
 
 	void Core::addPointer(const KDB::Primitives::Pointer& ptr)
 	{
-		m_ptrFile->writeRecord(ptr);
+		m_ptrFile->writeRecordAfterLast(ptr);
 	}
 
 	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getPointer(long long offset)
@@ -210,7 +210,7 @@ namespace KDB::Binary
 		//the partition needs to be allocated before use; the file ID is 1-based so it needs to be reduced
 		m_storageFiles.at(fileAndAdjustment.first - 1).allocatePartition(offset, size);
 
-		m_blocksFile->writeRecord(block);
+		m_blocksFile->writeRecordAfterLast(block);
 	}
 
 	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getBlock(long long offset)
@@ -232,10 +232,18 @@ namespace KDB::Binary
 		m_settings.PointerFormat.OffsetSize = cfgEntry->getIntValue();
 	}
 
-	//TODO: controllare conflitti con gli indirizzi esistenti (bisogna mantenere la tavola dei puntatori)
 	unsigned long long Core::createAddress()
 	{
-		return rand() * 10000;
+		const int maxTries = 100;
+		int tries = 0;
+		unsigned long long next;
+		do {
+			next = m_rng();
+			if (nullptr == m_ptrFile->scanForPointer(next, false))
+				return next;
+		} while (++tries < maxTries);
+
+		throw std::runtime_error("Fatal error: could not obtain an unused address.");
 	}
 
 	std::unique_ptr<KDB::Primitives::BlockDefinition> Core::seekBlock(Guid typeId)

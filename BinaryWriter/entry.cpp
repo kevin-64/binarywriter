@@ -53,8 +53,8 @@ int main()
 	//writePtr(core);
 	//readPtr(core);
 	//readBlock(core);
-	//writeObj(core, tydef);
-	readObj(core);
+	writeObj(core, tydef);
+	//readObj(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
@@ -153,7 +153,7 @@ void seekType(Core& core, const std::string& name)
 void writeObj(Core& core, const Type* type)
 {
 	std::map<std::string, void*> attrs;
-	int value = 64;
+	int value = 128;
 	attrs["MyField"] = &value;
 
 	auto obj = KDB::Primitives::Object(type, std::move(attrs));
@@ -163,7 +163,7 @@ void writeObj(Core& core, const Type* type)
 void readObj(Core& core)
 {
 	auto fmt = KDB::Primitives::PointerFormat{ 4, 4 };
-	KDB::Primitives::Pointer ptr(fmt, 0x064190);
+	KDB::Primitives::Pointer ptr(fmt, 0xD091BB5C);
 	auto record = core.getRecord(ptr);
 	auto i = 0;
 }

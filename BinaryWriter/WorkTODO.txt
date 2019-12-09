@@ -1,6 +1,3 @@
-RECORD SEEKING
-- Generazione indirizzi corretta
-
 RECORD WRITING
 - Modifica record
 - Eliminazione record
@@ -8,6 +5,7 @@ RECORD WRITING
 AVANZATE:
 - #fulprt Gestione partizioni piene e partizioni multiple
 - Ricerca record su condizioni sui campi
+- Mappa in memoria di puntatori e blocchi (Corretta nel BinaryWriter?)
 - #morrec Record remoti ed embedded
 
 MISC.

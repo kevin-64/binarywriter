@@ -49,7 +49,16 @@ namespace KDB::Binary
 		return *this;
 	}
 
-	bool FileWriter::writeRecord(const IDBRecord& record)
+	bool FileWriter::writeRecordAfterLast(const IDBRecord& record)
+	{
+		//for some reason seekp() alone does not work as expected
+		m_stream.seekg(0, std::ios_base::end);
+		m_stream.seekp(m_stream.tellg());
+
+		return writeRecordAtCurrPosition(record);
+	}
+
+	bool FileWriter::writeRecordAtCurrPosition(const IDBRecord& record)
 	{
 		auto data = record.getData();
 		m_stream.write(data.data(), data.size());
@@ -58,7 +67,7 @@ namespace KDB::Binary
 
 	unsigned long long FileWriter::writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit)
 	{
-		m_stream.seekp(offset);
+		m_stream.seekg(offset);
 		
 		//scan for a free location (indicated by 0xFF as the record type id)
 		while (m_stream.peek() != RecordType::DELETED_ENTRY)
@@ -66,18 +75,17 @@ namespace KDB::Binary
 			skipRecord();
 		}
 
-		//??? Why the hell is this necessary??? Aren't read/write operations sync'd in iostream??? And yet...
-		m_stream.seekp(m_stream.tellg());
-
 		//TODO: #fulprt check whether there actually is enough space to write the whole record, not just if we are at the end
 		//if we reach/pass the end, there is no space to write the record
-		auto currOffset = m_stream.tellp();
+		auto currOffset = m_stream.tellg();
 		if (currOffset >= limit)
 		{
 			throw std::runtime_error("Could not write record due to full partition - scanned from " + std::to_string(offset) + " to " + std::to_string(limit) + ".");
 		}
 
-		writeRecord(record);
+		//align writing position to current reading position (which is now in the correct place)
+		m_stream.seekp(currOffset);
+		writeRecordAtCurrPosition(record);
 
 		//the actual offset at which the record has been written is returned to allow a pointer to this location to be created
 		return currOffset;
@@ -127,16 +135,22 @@ namespace KDB::Binary
 		{
 			case RecordType::TYPE_DEFINITION:
 				skipType(m_stream);
+				break;
 			case RecordType::CONFIG_RECORD:
 				skipConfigEntry(m_stream);
+				break;
 			case RecordType::POINTER_RECORD:
 				skipPointer(m_stream, m_settings->PointerFormat);
+				break;
 			case RecordType::BLOCK_DEFINITION:
 				skipBlockDefinition(m_stream);
+				break;
 			case RecordType::BLOCK_PARTITION:
 				skipPartitionDefinition(m_stream);
+				break;
 			case RecordType::MAIN_RECORD:
 				skipObject(m_stream);
+				break;
 			//TODO: altri tipi di record
 		}
 	}
@@ -161,7 +175,7 @@ namespace KDB::Binary
 		char recordType;
 		m_stream.seekg(0);
 
-		do 
+		while (EOF != m_stream.peek())
 		{
 			m_stream.read(&recordType, 1);
 			auto type = reinterpret_cast<unsigned char*>(&recordType);
@@ -171,7 +185,7 @@ namespace KDB::Binary
 			auto bd = buildBlockDefinition(m_stream);
 			if (bd->getTypeId() == typeId)
 				return bd;
-		} while (m_stream.peek() != EOF);
+		}
 
 		auto id = typeId.toString();
 		throw std::runtime_error("No blocks have been allocated for type {" + id + "}");
@@ -182,7 +196,7 @@ namespace KDB::Binary
 		char recordType;
 		m_stream.seekg(0);
 
-		do 
+		while (EOF != m_stream.peek())
 		{
 			m_stream.read(&recordType, 1);
 			auto type = reinterpret_cast<unsigned char*>(&recordType);
@@ -192,7 +206,7 @@ namespace KDB::Binary
 			auto t = buildType(m_stream);
 			if (t->getName() == typeName)
 				return t;
-		} while (m_stream.peek() != EOF);
+		}
 
 		throw std::runtime_error("Type '" + typeName + "' has not been recognized.");
 	}
@@ -202,7 +216,7 @@ namespace KDB::Binary
 		char recordType;
 		m_stream.seekg(0);
 
-		do
+		while (EOF != m_stream.peek())
 		{
 			m_stream.read(&recordType, 1);
 			auto type = reinterpret_cast<unsigned char*>(&recordType);
@@ -212,7 +226,7 @@ namespace KDB::Binary
 			auto t = buildType(m_stream);
 			if (t->getTypeId() == typeId)
 				return t;
-		} while (m_stream.peek() != EOF);
+		}
 
 		throw std::runtime_error("Type {" + typeId.toString() + "} has not been recognized.");
 	}
@@ -222,7 +236,7 @@ namespace KDB::Binary
 		char recordType;
 		m_stream.seekg(0);
 
-		do
+		while (EOF != m_stream.peek())
 		{
 			m_stream.read(&recordType, 1);
 			auto type = reinterpret_cast<unsigned char*>(&recordType);
@@ -232,17 +246,17 @@ namespace KDB::Binary
 			auto b = buildBlockDefinition(m_stream);
 			if (b->getBlockId() == blockId)
 				return b;
-		} while (m_stream.peek() != EOF);
+		}
 
 		throw std::runtime_error("Block {" + blockId.toString() + "} has not been recognized.");
 	}
 
-	std::unique_ptr<Contracts::IDBPointer> FileWriter::scanForPointer(unsigned long long address)
+	std::unique_ptr<Contracts::IDBPointer> FileWriter::scanForPointer(unsigned long long address, bool throwIfNoMatch)
 	{
 		char recordType;
 		m_stream.seekg(0);
 
-		do
+		while (EOF != m_stream.peek())
 		{
 			m_stream.read(&recordType, 1);
 			auto type = reinterpret_cast<unsigned char*>(&recordType);
@@ -252,8 +266,10 @@ namespace KDB::Binary
 			auto p = buildPointer(m_stream, m_settings->PointerFormat);
 			if (p->getAddress() == address)
 				return p;
-		} while (m_stream.peek() != EOF);
+		}
 
-		throw std::runtime_error("Pointer " + std::to_string(address) + " has not been recognized.");
+		if (throwIfNoMatch)
+			throw std::runtime_error("Pointer " + std::to_string(address) + " has not been recognized.");
+		return nullptr;
 	}
 }
