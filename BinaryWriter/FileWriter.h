@@ -45,6 +45,7 @@ namespace KDB::Binary
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockType(Guid typeId);
 		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(const std::string& typeName);
 		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(Guid typeId);
+		std::unique_ptr<Primitives::BlockDefinition> scanForBlockId(Guid blockId);
 		std::unique_ptr<Contracts::IDBPointer> scanForPointer(unsigned long long address);
 	};
 }

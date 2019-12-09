@@ -1,5 +1,4 @@
 RECORD SEEKING
-- Ricerca blocchi per ID
 - Generazione indirizzi corretta
 
 RECORD WRITING

@@ -12,8 +12,6 @@
 namespace KDB::Binary
 {
 	using namespace KDB::Primitives;
-
-	//extern std::unique_ptr<Type> KDB::Primitives::buildType(std::fstream& stream);
 	using namespace Contracts;
 
 	FileWriter::FileWriter(KDB::Primitives::ConfigSettings* settings, std::string_view filename)
@@ -217,6 +215,26 @@ namespace KDB::Binary
 		} while (m_stream.peek() != EOF);
 
 		throw std::runtime_error("Type {" + typeId.toString() + "} has not been recognized.");
+	}
+
+	std::unique_ptr<BlockDefinition> FileWriter::scanForBlockId(Guid blockId)
+	{
+		char recordType;
+		m_stream.seekg(0);
+
+		do
+		{
+			m_stream.read(&recordType, 1);
+			auto type = reinterpret_cast<unsigned char*>(&recordType);
+			if (RecordType::BLOCK_DEFINITION != *type)
+				throw std::runtime_error("Internal error: invalid record type " + std::to_string(*type) + " while scanning blocks.");
+
+			auto b = buildBlockDefinition(m_stream);
+			if (b->getBlockId() == blockId)
+				return b;
+		} while (m_stream.peek() != EOF);
+
+		throw std::runtime_error("Block {" + blockId.toString() + "} has not been recognized.");
 	}
 
 	std::unique_ptr<Contracts::IDBPointer> FileWriter::scanForPointer(unsigned long long address)

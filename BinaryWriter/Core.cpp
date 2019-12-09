@@ -157,11 +157,8 @@ namespace KDB::Binary
 			blockId = realPtrDef->getBlockId();
 		}
 
-		//TODO: conversione tramite lista dei blocchi; per ora usiamo sempre il primo blocco della lista
-		auto blockOffset = 0; //getBlockFromId(blockId)
-		auto upBlock = this->getBlock(blockOffset);
-		auto pRecord = upBlock.get();
-		auto block = dynamic_cast<KDB::Primitives::BlockDefinition*>(pRecord);
+		auto upBlock = m_blocksFile->scanForBlockId(blockId);
+		auto block = upBlock.get();
 		auto fileAndOffset = block->getOffsetForRecord(startOffset);
 
 		auto type = m_typesFile->scanForTypeDefinition(block->getTypeId());

@@ -163,8 +163,7 @@ void writeObj(Core& core, const Type* type)
 void readObj(Core& core)
 {
 	auto fmt = KDB::Primitives::PointerFormat{ 4, 4 };
-	KDB::Primitives::Pointer ptr(fmt, 0, GuidEmpty(), 0);
-	//KDB::Primitives::Pointer ptr(fmt, 0x064190);
+	KDB::Primitives::Pointer ptr(fmt, 0x064190);
 	auto record = core.getRecord(ptr);
 	auto i = 0;
 }
