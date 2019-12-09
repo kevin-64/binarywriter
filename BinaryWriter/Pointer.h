@@ -13,15 +13,17 @@ namespace KDB::Primitives
 	class Pointer : public Contracts::IDBPointer
 	{
 	private:
-		Pointer();
+		Pointer() = default;
 		PointerFormat m_format;
 		unsigned long long m_address;
 		Guid m_blockId;
 		unsigned long long m_offset;
 		int m_size;
+		bool m_complete;
 
 	public:
 		Pointer(PointerFormat fmt, unsigned long long address, Guid blockId, unsigned long long offset);
+		Pointer(PointerFormat fmt, unsigned long long address);
 		virtual ~Pointer() = default;
 
 		friend void swapPointer(Pointer& lhs, Pointer& rhs) noexcept;
@@ -41,6 +43,7 @@ namespace KDB::Primitives
 
 		Guid getBlockId() const;
 		unsigned long long getOffset() const;
+		bool isComplete() const;
 
 		friend std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& ptrFormat);
 		friend void skipPointer(std::fstream& stream, const PointerFormat& format);

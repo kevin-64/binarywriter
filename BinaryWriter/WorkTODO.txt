@@ -1,5 +1,5 @@
 RECORD SEEKING
-- Ricerca puntatori per indirizzo
+- Ricerca blocchi per ID
 - Generazione indirizzi corretta
 
 RECORD WRITING
@@ -12,6 +12,6 @@ AVANZATE:
 - #morrec Record remoti ed embedded
 
 MISC.
-- Possibili leak: Type in Object
+- Unico GuidEmpty per performance
 - Riordino eccezioni
 - Pulizia interfaccia Core

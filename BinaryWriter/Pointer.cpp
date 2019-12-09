@@ -13,14 +13,19 @@ namespace KDB::Primitives
 		std::swap(lhs.m_address, rhs.m_address);
 		std::swap(lhs.m_blockId, rhs.m_blockId);
 		std::swap(lhs.m_offset, rhs.m_offset);
+		std::swap(lhs.m_complete, rhs.m_complete);
 	}
 
-	Pointer::Pointer()
-	{
-	}
-
+	//Complete constructor: used when the pointer is created and needs to be stored
 	Pointer::Pointer(PointerFormat format, int64 address, Guid blockId, int64 offset)
-		: m_size(0), m_format(format), m_address(address), m_blockId(blockId), m_offset(offset)
+		: m_size(0), m_format(format), m_address(address), m_blockId(blockId), m_offset(offset), m_complete(true)
+	{
+		this->m_size = getSize();
+	}
+
+	//Incomplete constructor: used when the pointer needs to be passed to clients
+	Pointer::Pointer(PointerFormat format, int64 address)
+		: m_size(0), m_format(format), m_address(address), m_blockId(GuidEmpty()), m_offset(0), m_complete(false)
 	{
 		this->m_size = getSize();
 	}
@@ -88,12 +93,21 @@ namespace KDB::Primitives
 
 	Guid Pointer::getBlockId() const
 	{
-		return this->m_blockId;
+		if (m_complete)
+			return this->m_blockId;
+		throw new std::runtime_error("Attempted to dereference incomplete pointer.");
 	}
 
 	unsigned long long Pointer::getOffset() const
 	{
-		return this->m_offset;
+		if (m_complete)
+			return this->m_offset;
+		throw new std::runtime_error("Attempted to dereference incomplete pointer.");
+	}
+
+	bool Pointer::isComplete() const
+	{
+		return m_complete;
 	}
 
 	std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& format)
@@ -112,7 +126,7 @@ namespace KDB::Primitives
 	void skipPointer(std::fstream& stream, const PointerFormat& format)
 	{
 		//16 is the size of a GUID
-		unsigned long long total = format.AddressSize + 16 + format.OffsetSize;
+		unsigned long long total = 16ULL + (unsigned long long)(format.AddressSize) + (unsigned long long)(format.OffsetSize);
 		stream.ignore(total);
 	}
 }

@@ -6,6 +6,7 @@
 #include "BlockDefinition.h"
 #include "Type.h"
 #include "IDBType.h"
+#include "IDBPointer.h"
 #include <string>
 #include <string_view>
 #include <iostream>
@@ -44,5 +45,6 @@ namespace KDB::Binary
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockType(Guid typeId);
 		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(const std::string& typeName);
 		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(Guid typeId);
+		std::unique_ptr<Contracts::IDBPointer> scanForPointer(unsigned long long address);
 	};
 }

@@ -143,9 +143,19 @@ namespace KDB::Binary
 	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getRecord(KDB::Contracts::IDBPointer& ptr)
 	{
 		auto realPtr = dynamic_cast<KDB::Primitives::Pointer*>(&ptr);
-		//TODO: trovare il vero blocco e l'offset nel file dei puntatori; per ora viene passato nell'oggetto puntatore
-		//auto blockId = realPtr->getBlockId();
-		auto startOffset = realPtr->getOffset();
+		Guid blockId;
+		unsigned long long startOffset;
+
+		if (realPtr->isComplete()) {
+			startOffset = realPtr->getOffset();
+			blockId = realPtr->getBlockId();
+		} else {
+			//if the pointer is incomplete (client-side), its value needs to be fetched from the pointers file
+			auto ptrDef = m_ptrFile->scanForPointer(realPtr->getAddress());
+			auto realPtrDef = dynamic_cast<KDB::Primitives::Pointer*>(ptrDef.get());
+			startOffset = realPtrDef->getOffset();
+			blockId = realPtrDef->getBlockId();
+		}
 
 		//TODO: conversione tramite lista dei blocchi; per ora usiamo sempre il primo blocco della lista
 		auto blockOffset = 0; //getBlockFromId(blockId)

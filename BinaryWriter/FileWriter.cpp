@@ -196,7 +196,7 @@ namespace KDB::Binary
 				return t;
 		} while (m_stream.peek() != EOF);
 
-		throw std::runtime_error("Type {" + typeName + "} has not been recognized.");
+		throw std::runtime_error("Type '" + typeName + "' has not been recognized.");
 	}
 
 	std::unique_ptr<Contracts::IDBType> FileWriter::scanForTypeDefinition(Guid typeId) 
@@ -217,5 +217,25 @@ namespace KDB::Binary
 		} while (m_stream.peek() != EOF);
 
 		throw std::runtime_error("Type {" + typeId.toString() + "} has not been recognized.");
+	}
+
+	std::unique_ptr<Contracts::IDBPointer> FileWriter::scanForPointer(unsigned long long address)
+	{
+		char recordType;
+		m_stream.seekg(0);
+
+		do
+		{
+			m_stream.read(&recordType, 1);
+			auto type = reinterpret_cast<unsigned char*>(&recordType);
+			if (RecordType::POINTER_RECORD != *type)
+				throw std::runtime_error("Internal error: invalid record type " + std::to_string(*type) + " while scanning pointers.");
+
+			auto p = buildPointer(m_stream, m_settings->PointerFormat);
+			if (p->getAddress() == address)
+				return p;
+		} while (m_stream.peek() != EOF);
+
+		throw std::runtime_error("Pointer " + std::to_string(address) + " has not been recognized.");
 	}
 }
