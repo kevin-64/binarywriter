@@ -122,6 +122,39 @@ namespace KDB::Binary
 		}
 	}
 
+	bool FileWriter::deleteRecord(long long offset)
+	{
+		m_stream.seekg(offset);
+
+		char recordType;
+		m_stream.read(&recordType, 1);
+
+		auto rType = reinterpret_cast<unsigned char*>(&recordType);
+
+		switch (*rType)
+		{
+		case RecordType::TYPE_DEFINITION:
+			//return deleteType(m_stream);
+			break;
+		case RecordType::CONFIG_RECORD:
+			//return deleteConfigEntry(m_stream);
+			break;
+		case RecordType::POINTER_RECORD:
+			//return deletePointer(m_stream, m_settings->PointerFormat);
+			break;
+		case RecordType::BLOCK_DEFINITION:
+			//return deleteBlockDefinition(m_stream);
+			break;
+		case RecordType::BLOCK_PARTITION:
+			//return deletePartitionDefinition(m_stream);
+			break;
+		case RecordType::MAIN_RECORD:
+			return deleteObject(m_stream);
+			//TODO: altri tipi di record
+		}
+
+	}
+
 	void FileWriter::skipRecord()
 	{
 		char recordType;

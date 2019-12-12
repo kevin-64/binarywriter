@@ -45,8 +45,10 @@ namespace KDB::Primitives
 
 		friend std::unique_ptr<Object> buildObject(std::fstream& stream, KDB::Primitives::Type* type);
 		friend void skipObject(std::fstream& stream);
+		friend bool deleteObject(std::fstream& stream);
 	};
 
 	std::unique_ptr<Object> buildObject(std::fstream& stream, KDB::Primitives::Type* type);
 	void skipObject(std::fstream& stream);
+	bool deleteObject(std::fstream& stream);
 }

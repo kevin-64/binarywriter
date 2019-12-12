@@ -37,6 +37,7 @@ void seekType(Core&, const std::string&);
 
 void writeObj(Core&, const Type* type);
 void readObj(Core&);
+void removeObj(Core&);
 
 int main()
 {
@@ -53,8 +54,9 @@ int main()
 	//writePtr(core);
 	//readPtr(core);
 	//readBlock(core);
-	writeObj(core, tydef);
+	//writeObj(core, tydef);
 	//readObj(core);
+	removeObj(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
@@ -158,6 +160,14 @@ void writeObj(Core& core, const Type* type)
 
 	auto obj = KDB::Primitives::Object(type, std::move(attrs));
 	auto ptr = core.addRecord(obj);
+}
+
+void removeObj(Core& core)
+{
+	auto fmt = KDB::Primitives::PointerFormat{ 4, 4 };
+	KDB::Primitives::Pointer ptr(fmt, 0xD091BB5C);
+
+	core.deleteRecord(ptr);
 }
 
 void readObj(Core& core)

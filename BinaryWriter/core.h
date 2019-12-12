@@ -33,6 +33,7 @@ namespace KDB::Binary {
 
 		void readConfiguration();
 		unsigned long long createAddress();
+		std::pair<std::pair<int, unsigned long long>, KDB::Primitives::Type*> findRecord(const KDB::Contracts::IDBPointer& ptr);
 	public:
 		Core(const std::string& definitionFilePath);
 		virtual ~Core();
@@ -51,7 +52,7 @@ namespace KDB::Binary {
 		std::unique_ptr<KDB::Contracts::IDBRecord> getConfigEntry(long long offset);
 		void addConfigEntry(const KDB::Primitives::ConfigEntry& entry);
 
-		std::unique_ptr<KDB::Contracts::IDBRecord> getRecord(KDB::Contracts::IDBPointer& ptr);
+		std::unique_ptr<KDB::Contracts::IDBRecord> getRecord(const KDB::Contracts::IDBPointer& ptr);
 
 		std::unique_ptr<KDB::Contracts::IDBRecord> getPointer(long long offset);
 		void addPointer(const KDB::Primitives::Pointer& ptr);
@@ -60,6 +61,7 @@ namespace KDB::Binary {
 		void addBlock(const KDB::Primitives::BlockDefinition& block);
 
 		std::unique_ptr<KDB::Contracts::IDBPointer> addRecord(const KDB::Primitives::Object& object);
+		bool deleteRecord(const KDB::Contracts::IDBPointer& ptr);
 
 		//temporanea: nella versione finale il chiamante non ha necessità di conoscere il blocco
 		std::unique_ptr<KDB::Primitives::BlockDefinition> seekBlock(Guid typeId);

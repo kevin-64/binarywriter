@@ -42,6 +42,8 @@ namespace KDB::Binary
 		std::unique_ptr<Contracts::IDBRecord> readRecord(long long offset);
 		std::unique_ptr<Contracts::IDBRecord> readRecord(long long offset, KDB::Primitives::Type* objectType);
 
+		bool deleteRecord(long long offset);
+
 		void allocatePartition(unsigned long long offset, unsigned long long size);
 
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockType(Guid typeId);

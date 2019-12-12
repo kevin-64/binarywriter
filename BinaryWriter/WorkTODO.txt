@@ -1,6 +1,6 @@
 RECORD WRITING
 - Modifica record
-- Eliminazione record
+- Eliminazione record (in corso)
 
 AVANZATE:
 - #fulprt Gestione partizioni piene e partizioni multiple

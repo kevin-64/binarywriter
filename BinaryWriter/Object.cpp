@@ -235,6 +235,22 @@ namespace KDB::Primitives
 		stream.ignore(recordSize);
 	}
 
+	bool deleteObject(std::fstream& stream)
+	{
+		int recordSize;
+		Utilities::read_int(stream, &recordSize);
+
+		auto headerSize = 1 + sizeof(int); //record type and size
+		auto pos = stream.tellg();
+		stream.seekp((unsigned long long)pos - headerSize); //we go back to before the header
+
+		auto fullSize = headerSize + recordSize;
+		std::vector<char> data(fullSize, DELETED_ENTRY);
+		stream.write(data.data(), fullSize);
+
+		return true;
+	}
+
 	//utility function to write individual fields to the data vector
 	int Object::writeFieldData(std::vector<char>& data, void* fieldData, FieldType fieldType) const
 	{

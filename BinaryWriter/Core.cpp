@@ -140,9 +140,9 @@ namespace KDB::Binary
 		m_configFile->writeRecordAfterLast(entry);
 	}
 
-	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getRecord(KDB::Contracts::IDBPointer& ptr)
+	std::pair<std::pair<int, unsigned long long>, KDB::Primitives::Type*> Core::findRecord(const KDB::Contracts::IDBPointer& ptr)
 	{
-		auto realPtr = dynamic_cast<KDB::Primitives::Pointer*>(&ptr);
+		auto realPtr = dynamic_cast<const KDB::Primitives::Pointer*>(&ptr);
 		Guid blockId;
 		unsigned long long startOffset;
 
@@ -164,7 +164,15 @@ namespace KDB::Binary
 		auto type = m_typesFile->scanForTypeDefinition(block->getTypeId());
 		auto realType = dynamic_cast<KDB::Primitives::Type*>(type.release());
 
-		return m_storageFiles.at(fileAndOffset.first - 1).readRecord(fileAndOffset.second, realType);
+		return std::make_pair(fileAndOffset, realType);
+	}
+
+	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getRecord(const KDB::Contracts::IDBPointer& ptr)
+	{
+		auto recInfo = findRecord(ptr);
+		auto fileAndOffset = recInfo.first;
+		auto type = recInfo.second;
+		return m_storageFiles.at(fileAndOffset.first - 1).readRecord(fileAndOffset.second, type);
 	}
 
 	std::unique_ptr<KDB::Contracts::IDBPointer> Core::addRecord(const KDB::Primitives::Object& object)
@@ -186,6 +194,12 @@ namespace KDB::Binary
 		auto ptr = KDB::Primitives::Pointer(m_settings.PointerFormat, address, block->getBlockId(), writeOffset - offset);
 		addPointer(ptr);
 		return std::make_unique<KDB::Primitives::Pointer>(std::move(ptr));
+	}
+
+	bool Core::deleteRecord(const KDB::Contracts::IDBPointer& ptr)
+	{
+		auto fileAndOffset = findRecord(ptr).first;
+		return m_storageFiles.at(fileAndOffset.first - 1).deleteRecord(fileAndOffset.second);
 	}
 
 	void Core::addPointer(const KDB::Primitives::Pointer& ptr)
