@@ -1,3 +1,6 @@
+//problemi di overflow tra int e size_t
+#pragma warning( disable : 26451)
+
 #include "FileWriter.h"
 #include "ConfigSettings.h"
 #include "Field.h"
@@ -55,37 +58,76 @@ namespace KDB::Binary
 		m_stream.seekg(0, std::ios_base::end);
 		m_stream.seekp(m_stream.tellg());
 
-		return writeRecordAtCurrPosition(record);
+		auto data = record.getData();
+		return writeRecordAtCurrPosition(data, 0);
 	}
 
-	bool FileWriter::writeRecordAtCurrPosition(const IDBRecord& record)
+	bool FileWriter::writeRecordAtCurrPosition(const std::vector<char>& data, int spaceAfter)
 	{
-		auto data = record.getData();
 		m_stream.write(data.data(), data.size());
+
+		//if we are writing in the middle of the file, we need to signal how much empty space is left after the record
+		if (spaceAfter >= 5)
+		{
+			vector<char> emptyAfter;
+			emptyAfter.push_back(DELETED_ENTRY);
+			Utilities::push_int(emptyAfter, spaceAfter);
+			m_stream.write(emptyAfter.data(), emptyAfter.size());
+		}
+		else if (spaceAfter > 0)
+		{
+			//spaces smaller than 5 bytes are handled with padding as they would not be able to contain their own size
+			vector<char> padding(spaceAfter, PADDING);
+			m_stream.write(padding.data(), spaceAfter);
+		}
+
 		return true;
 	}
 
 	unsigned long long FileWriter::writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit)
 	{
 		m_stream.seekg(offset);
-		
-		//scan for a free location (indicated by 0xFF as the record type id)
-		while (m_stream.peek() != RecordType::DELETED_ENTRY)
+
+		//we need to materialize the record here in order to know whether it will fit in a given space or not
+		auto data = record.getData();
+		auto size = data.size();
+		int headerSize = sizeof(int) + 1;
+
+		int spare = -1;
+		int next;
+		while ((next = m_stream.peek()) != EOF)
 		{
-			skipRecord();
+			int spaceSize;
+
+			//scan for a free location (indicated by 0xFF as the record type id)
+			if (next != RecordType::DELETED_ENTRY) 
+			{
+				skipRecord();
+				continue;
+			}
+
+			//check that the free space is large enough for the record; if not, we keep looking
+			m_stream.ignore(1); //ignore the empty record marker
+			Utilities::read_int(m_stream, &spaceSize);
+			spare = spaceSize - size;
+			if (spare >= 0)
+				break;
+			m_stream.ignore(spaceSize - headerSize); //we already consumed 5 bytes for the record type and size
 		}
 
-		//TODO: #fulprt check whether there actually is enough space to write the whole record, not just if we are at the end
-		//if we reach/pass the end, there is no space to write the record
+		//go back to the beginning of the record
+		m_stream.seekg(-headerSize, std::ios::cur);
+
 		auto currOffset = m_stream.tellg();
-		if (currOffset >= limit)
+		//if we reach/pass the end of the partition or of the file, there is no space to write the record
+		if (spare < 0 || currOffset >= limit)
 		{
 			throw std::runtime_error("Could not write record due to full partition - scanned from " + std::to_string(offset) + " to " + std::to_string(limit) + ".");
 		}
 
 		//align writing position to current reading position (which is now in the correct place)
 		m_stream.seekp(currOffset);
-		writeRecordAtCurrPosition(record);
+		writeRecordAtCurrPosition(data, spare);
 
 		//the actual offset at which the record has been written is returned to allow a pointer to this location to be created
 		return currOffset;
@@ -166,6 +208,9 @@ namespace KDB::Binary
 		//on the content of the record itself)
 		switch (*type)
 		{
+			case RecordType::PADDING:
+				m_stream.ignore(1);
+				break;
 			case RecordType::TYPE_DEFINITION:
 				skipType(m_stream);
 				break;
@@ -191,16 +236,19 @@ namespace KDB::Binary
 	void FileWriter::allocatePartition(unsigned long long offset, unsigned long long size)
 	{
 		m_stream.seekp(offset);
-		
-		vector<char> fillVector{ (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF };
-		int64 count = 0;
 
-		//the entire partition is blanked with 0xFF, 8 bytes at a time
-		do
-		{
-			m_stream.write(fillVector.data(), fillVector.size());
-			count += sizeof(int64);
-		} while (count < size);
+		char rType = DELETED_ENTRY;
+		m_stream.write(&rType, 1);
+
+		//at the beginning we need to indicate the size of the available space
+		vector<char> partSizeMarker;
+		Utilities::push_int(partSizeMarker, (int)size);
+		m_stream.write(partSizeMarker.data(), sizeof(int));
+
+		//the entire partition is blanked with 0xFF
+		auto headerSize = 1 + sizeof(int);
+		vector<char> fillVec(size - headerSize, 0xFF);
+		m_stream.write(fillVec.data(), size - headerSize);
 	}
 
 	std::unique_ptr<BlockDefinition> FileWriter::scanForBlockType(Guid typeId)

@@ -23,7 +23,7 @@ namespace KDB::Binary
 		FileWriter() = default;
 
 		void skipRecord();
-		bool writeRecordAtCurrPosition(const Contracts::IDBRecord& record);
+		bool writeRecordAtCurrPosition(const std::vector<char>& data, int spaceAfter);
 	public:
 		FileWriter(KDB::Primitives::ConfigSettings* settings, std::string_view filename);
 		virtual ~FileWriter();

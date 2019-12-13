@@ -1,9 +1,11 @@
 RECORD WRITING
 - Modifica record
-- Eliminazione record (in corso)
+- Eliminazione record
+	- Indirizzi (gestione owning/non-owning pointers)
+	- Tipi (cosa fare con i blocchi corrispondenti e i loro record?)
 
 AVANZATE:
-- #fulprt Gestione partizioni piene e partizioni multiple
+- #fulprt Gestione partizioni multiple
 - Ricerca record su condizioni sui campi
 - Mappa in memoria di puntatori e blocchi (Corretta nel BinaryWriter?)
 - #morrec Record remoti ed embedded

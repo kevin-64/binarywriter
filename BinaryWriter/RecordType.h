@@ -22,6 +22,7 @@ namespace KDB::Primitives
 		CONFIG_RECORD = 0xF0,
 		
 		//special records
+		PADDING = 0xF1,
 		END_OF_FILE = 0xFE,
 		DELETED_ENTRY = 0xFF
 	};

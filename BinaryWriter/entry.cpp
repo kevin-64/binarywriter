@@ -54,9 +54,9 @@ int main()
 	//writePtr(core);
 	//readPtr(core);
 	//readBlock(core);
-	//writeObj(core, tydef);
+	writeObj(core, tydef);
 	//readObj(core);
-	removeObj(core);
+	//removeObj(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
