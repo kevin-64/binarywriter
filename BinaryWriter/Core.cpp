@@ -45,22 +45,22 @@ namespace KDB::Binary
 			if (start == STORAGE_ID)
 			{
 				initStatus |= 1;
-				m_storageFiles.emplace_back(&m_settings, actual);
+				m_storageFiles.emplace_back(&m_settings, actual, false);
 			}
 			else if (start == INDEXES_ID)
 			{
 				initStatus |= (1 << 1);
-				m_indexFiles.emplace_back(&m_settings, actual);
+				m_indexFiles.emplace_back(&m_settings, actual, false);
 			}
 			else if (key == TYPEDEF_ID)
 			{
 				initStatus |= (1 << 2);
-				m_typesFile = new FileWriter(&m_settings, actual);
+				m_typesFile = new FileWriter(&m_settings, actual, false);
 			}
 			else if (key == KDBCONF_ID)
 			{
 				initStatus |= (1 << 3);
-				m_configFile = new FileWriter(&m_settings, actual);
+				m_configFile = new FileWriter(&m_settings, actual, false);
 
 				//we read the static part of the database configuration
 				readConfiguration();
@@ -68,22 +68,22 @@ namespace KDB::Binary
 			else if (key == PTRTABL_ID)
 			{
 				initStatus |= (1 << 4);
-				m_ptrFile = new FileWriter(&m_settings, actual);
+				m_ptrFile = new FileWriter(&m_settings, actual, false);
 			}
 			else if (key == BLOCDEF_ID)
 			{
 				initStatus |= (1 << 5);
-				m_blocksFile = new FileWriter(&m_settings, actual);
+				m_blocksFile = new FileWriter(&m_settings, actual, false);
 			}
 			else if (key == DIARYOO_ID)
 			{
 				initStatus |= (1 << 6);
-				m_diaryFile = new FileWriter(&m_settings, actual);
+				m_diaryFile = new FileWriter(&m_settings, actual, false);
 			}
 			else if (key == VOLATIL_ID)
 			{
 				initStatus |= (1 << 7);
-				m_tempFile = new FileWriter(&m_settings, actual);
+				m_tempFile = new FileWriter(&m_settings, actual, true);
 			}
 			else 
 			{
@@ -140,7 +140,8 @@ namespace KDB::Binary
 		m_configFile->writeRecordAfterLast(entry);
 	}
 
-	std::pair<std::pair<int, unsigned long long>, KDB::Primitives::Type*> Core::findRecord(const KDB::Contracts::IDBPointer& ptr)
+	std::pair<std::pair<int, unsigned long long>, KDB::Primitives::Type*> Core::findRecord(const KDB::Contracts::IDBPointer& ptr,
+																						   bool& isOwner)
 	{
 		auto realPtr = dynamic_cast<const KDB::Primitives::Pointer*>(&ptr);
 		Guid blockId;
@@ -149,12 +150,16 @@ namespace KDB::Binary
 		if (realPtr->isComplete()) {
 			startOffset = realPtr->getOffset();
 			blockId = realPtr->getBlockId();
+			isOwner = (realPtr->getPointerType() == Contracts::PointerType::Owning);
 		} else {
 			//if the pointer is incomplete (client-side), its value needs to be fetched from the pointers file
-			auto ptrDef = m_ptrFile->scanForPointer(realPtr->getAddress(), true);
+			auto ptrDef = m_ptrFile->scanForPointer(realPtr->getAddress(), false);
+			if (nullptr == ptrDef) //it might be a volatile pointer
+				ptrDef = m_tempFile->scanTempForPointer(realPtr->getAddress(), true);
 			auto realPtrDef = dynamic_cast<KDB::Primitives::Pointer*>(ptrDef.get());
 			startOffset = realPtrDef->getOffset();
 			blockId = realPtrDef->getBlockId();
+			isOwner = (realPtrDef->getPointerType() == Contracts::PointerType::Owning);
 		}
 
 		auto upBlock = m_blocksFile->scanForBlockId(blockId);
@@ -169,10 +174,47 @@ namespace KDB::Binary
 
 	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getRecord(const KDB::Contracts::IDBPointer& ptr)
 	{
-		auto recInfo = findRecord(ptr);
+		bool isOwner;
+		auto recInfo = findRecord(ptr, isOwner);
 		auto fileAndOffset = recInfo.first;
 		auto type = recInfo.second;
 		return m_storageFiles.at(fileAndOffset.first - 1).readRecord(fileAndOffset.second, type);
+	}
+
+	std::unique_ptr<KDB::Contracts::IDBPointer> Core::getShared(const KDB::Contracts::IDBPointer& owningPtr)
+	{
+		Guid blockId;
+		unsigned long long offset;
+		bool isOwner;
+		
+		auto realPtr = dynamic_cast<const Primitives::Pointer*>(&owningPtr);
+
+		if (realPtr->isComplete())
+		{
+			blockId = realPtr->getBlockId();
+			offset = realPtr->getOffset();
+			isOwner = (realPtr->getPointerType() == Contracts::PointerType::Owning);
+		}
+		else
+		{
+			auto uCompletePtr = m_ptrFile->scanForPointer(realPtr->getAddress(), true);
+			auto completePtr = uCompletePtr.get();
+			auto realCompletePtr = dynamic_cast<Primitives::Pointer*>(completePtr);
+			blockId = realCompletePtr->getBlockId();
+			offset = realCompletePtr->getOffset();
+			isOwner = (realCompletePtr->getPointerType() == Contracts::PointerType::Owning);
+		}
+
+		if (!isOwner)
+			throw std::runtime_error("Cannot obtain shared pointer through non-owning pointer.");
+		
+		//a new shared pointer is generated for the new record
+		auto address = createAddress();
+		auto ptr = KDB::Primitives::Pointer(m_settings.PointerFormat, address, blockId, offset, Contracts::PointerType::Shared);
+		
+		//shared pointers are volatile by default unless explicitly persisted
+		addTemp(ptr);
+		return std::make_unique<KDB::Primitives::Pointer>(std::move(ptr));
 	}
 
 	std::unique_ptr<KDB::Contracts::IDBPointer> Core::addRecord(const KDB::Primitives::Object& object)
@@ -189,16 +231,22 @@ namespace KDB::Binary
 		auto limit = offset + size - 1;
 		auto writeOffset = m_storageFiles.at(coord.first - 1).writeRecordAfterOffset(object, offset, limit);
 		
-		//a new address is generated for the new record, to be stored in the pointer table
+		//the owning pointer is generated for the new record, to be stored in the pointer table
 		auto address = createAddress();
-		auto ptr = KDB::Primitives::Pointer(m_settings.PointerFormat, address, block->getBlockId(), writeOffset - offset);
+		auto ptr = KDB::Primitives::Pointer(m_settings.PointerFormat, address, block->getBlockId(), 
+										    writeOffset - offset, Contracts::PointerType::Owning);
 		addPointer(ptr);
 		return std::make_unique<KDB::Primitives::Pointer>(std::move(ptr));
 	}
 
-	bool Core::deleteRecord(const KDB::Contracts::IDBPointer& ptr)
+	bool Core::deleteRecord(const KDB::Contracts::IDBPointer& owningPtr)
 	{
-		auto fileAndOffset = findRecord(ptr).first;
+		bool isOwner;
+		auto fileAndOffset = findRecord(owningPtr, isOwner).first;
+
+		if (!isOwner)
+			throw std::runtime_error("Cannot delete record through non-owning pointer.");
+
 		return m_storageFiles.at(fileAndOffset.first - 1).deleteRecord(fileAndOffset.second);
 	}
 
@@ -258,6 +306,11 @@ namespace KDB::Binary
 		} while (++tries < maxTries);
 
 		throw std::runtime_error("Fatal error: could not obtain an unused address.");
+	}
+
+	void Core::addTemp(const KDB::Contracts::IDBRecord& record)
+	{
+		m_tempFile->writeRecordAfterLast(record);
 	}
 
 	std::unique_ptr<KDB::Primitives::BlockDefinition> Core::seekBlock(Guid typeId)

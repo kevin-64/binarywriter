@@ -13,19 +13,22 @@ namespace KDB::Primitives
 		std::swap(lhs.m_address, rhs.m_address);
 		std::swap(lhs.m_blockId, rhs.m_blockId);
 		std::swap(lhs.m_offset, rhs.m_offset);
+		std::swap(lhs.m_ptrType, rhs.m_ptrType);
 		std::swap(lhs.m_complete, rhs.m_complete);
 	}
 
 	//Complete constructor: used when the pointer is created and needs to be stored
-	Pointer::Pointer(PointerFormat format, int64 address, Guid blockId, int64 offset)
-		: m_size(0), m_format(format), m_address(address), m_blockId(blockId), m_offset(offset), m_complete(true)
+	Pointer::Pointer(PointerFormat format, int64 address, Guid blockId, int64 offset, Contracts::PointerType ptrType)
+		: m_size(0), m_format(format), m_address(address), m_blockId(blockId), m_offset(offset), m_ptrType(ptrType), 
+		  m_complete(true)
 	{
 		this->m_size = getSize();
 	}
 
 	//Incomplete constructor: used when the pointer needs to be passed to clients
 	Pointer::Pointer(PointerFormat format, int64 address)
-		: m_size(0), m_format(format), m_address(address), m_blockId(GuidEmpty()), m_offset(0), m_complete(false)
+		: m_size(0), m_format(format), m_address(address), m_blockId(GuidEmpty()), m_offset(0), 
+		  m_ptrType(Contracts::PointerType::Unspecified), m_complete(false)
 	{
 		this->m_size = getSize();
 	}
@@ -63,7 +66,7 @@ namespace KDB::Primitives
 
 //disabilitiamo gli warning per il troncamento
 #pragma warning( disable : 4305 4309)
-		data.push_back(RecordType::POINTER_RECORD);
+		data.push_back((unsigned char)(this->m_ptrType));
 		
 		//at the moment only sizes 2, 4 or 8 are supported:
 		Utilities::push_varint(data, this->m_address, this->m_format.AddressSize);
@@ -91,6 +94,11 @@ namespace KDB::Primitives
 		return this->m_address;
 	}
 
+	Contracts::PointerType Pointer::getPointerType() const
+	{
+		return this->m_ptrType;
+	}
+
 	Guid Pointer::getBlockId() const
 	{
 		if (m_complete)
@@ -110,7 +118,7 @@ namespace KDB::Primitives
 		return m_complete;
 	}
 
-	std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& format)
+	std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& format, Contracts::PointerType ptrType)
 	{
 		unsigned long long address;
 		GUID blockId;
@@ -120,7 +128,7 @@ namespace KDB::Primitives
 		Utilities::read_GUID(stream, &blockId);
 		Utilities::read_varint(stream, &offset,  format.OffsetSize);
 
-		return std::make_unique<Pointer>(Pointer(PointerFormat(format), address, Guid(std::move(blockId)), offset));
+		return std::make_unique<Pointer>(Pointer(PointerFormat(format), address, Guid(std::move(blockId)), offset, ptrType));
 	}
 
 	void skipPointer(std::fstream& stream, const PointerFormat& format)

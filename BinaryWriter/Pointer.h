@@ -16,13 +16,14 @@ namespace KDB::Primitives
 		Pointer() = default;
 		PointerFormat m_format;
 		unsigned long long m_address;
+		Contracts::PointerType m_ptrType;
 		Guid m_blockId;
 		unsigned long long m_offset;
 		int m_size;
 		bool m_complete;
 
 	public:
-		Pointer(PointerFormat fmt, unsigned long long address, Guid blockId, unsigned long long offset);
+		Pointer(PointerFormat fmt, unsigned long long address, Guid blockId, unsigned long long offset, Contracts::PointerType ptrType);
 		Pointer(PointerFormat fmt, unsigned long long address);
 		virtual ~Pointer() = default;
 
@@ -40,15 +41,16 @@ namespace KDB::Primitives
 		virtual int getSize() const override;
 
 		virtual unsigned long long getAddress() const override;
+		virtual Contracts::PointerType getPointerType() const override;
 
 		Guid getBlockId() const;
 		unsigned long long getOffset() const;
 		bool isComplete() const;
 
-		friend std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& ptrFormat);
+		friend std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& ptrFormat, Contracts::PointerType ptrType);
 		friend void skipPointer(std::fstream& stream, const PointerFormat& format);
 	};
 
-	std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& ptrFormat);
+	std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& ptrFormat, Contracts::PointerType ptrType);
 	void skipPointer(std::fstream& stream, const PointerFormat& format);
 }

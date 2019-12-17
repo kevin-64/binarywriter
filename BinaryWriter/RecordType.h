@@ -12,7 +12,10 @@ namespace KDB::Primitives
 		BULK_ENTRY = 0x05,
 
 		//addressing records
-		POINTER_RECORD = 0xA0,
+		OWNING_POINTER_RECORD = 0xA0,
+		SHARED_POINTER_RECORD = 0xA1,
+		REFERENCE_POINTER_RECORD = 0xA2,
+		HOLD_POINTER_RECORD = 0xA3,
 
 		//block definition records
 		BLOCK_DEFINITION = 0xB0,

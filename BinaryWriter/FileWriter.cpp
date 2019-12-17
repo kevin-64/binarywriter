@@ -17,11 +17,15 @@ namespace KDB::Binary
 	using namespace KDB::Primitives;
 	using namespace Contracts;
 
-	FileWriter::FileWriter(KDB::Primitives::ConfigSettings* settings, std::string_view filename)
+	FileWriter::FileWriter(KDB::Primitives::ConfigSettings* settings, std::string_view filename, bool isVolatile)
 		: m_settings(settings), m_fileName(filename)
 	{
-		//we open the file in the ctor and it will stay open for the lifetime of the class for performance reasons
-		m_stream.open(m_fileName.c_str(), ios::binary | ios::in | ios::out);
+		//we open the file in the ctor and it will stay open for the lifetime of the class for performance reasons;
+		//volatile files are cleared before opening
+		if (isVolatile)
+			m_stream.open(m_fileName.c_str(), ios::binary | ios::in | ios::out | ios::trunc);
+		else
+			m_stream.open(m_fileName.c_str(), ios::binary | ios::in | ios::out);
 	}
 
 	FileWriter::~FileWriter()
@@ -152,8 +156,11 @@ namespace KDB::Binary
 				return buildType(m_stream);
 			case RecordType::CONFIG_RECORD:
 				return buildConfigEntry(m_stream);
-			case RecordType::POINTER_RECORD:
-				return buildPointer(m_stream, m_settings->PointerFormat);
+			case RecordType::OWNING_POINTER_RECORD:
+			case RecordType::SHARED_POINTER_RECORD:
+			case RecordType::REFERENCE_POINTER_RECORD:
+			case RecordType::HOLD_POINTER_RECORD:
+				return buildPointer(m_stream, m_settings->PointerFormat, (Contracts::PointerType)(*rType));
 			case RecordType::BLOCK_DEFINITION:
 				return buildBlockDefinition(m_stream);
 			case RecordType::BLOCK_PARTITION:
@@ -181,7 +188,10 @@ namespace KDB::Binary
 		case RecordType::CONFIG_RECORD:
 			//return deleteConfigEntry(m_stream);
 			break;
-		case RecordType::POINTER_RECORD:
+		case RecordType::OWNING_POINTER_RECORD:
+		case RecordType::SHARED_POINTER_RECORD:
+		case RecordType::REFERENCE_POINTER_RECORD:
+		case RecordType::HOLD_POINTER_RECORD:
 			//return deletePointer(m_stream, m_settings->PointerFormat);
 			break;
 		case RecordType::BLOCK_DEFINITION:
@@ -217,7 +227,10 @@ namespace KDB::Binary
 			case RecordType::CONFIG_RECORD:
 				skipConfigEntry(m_stream);
 				break;
-			case RecordType::POINTER_RECORD:
+			case RecordType::OWNING_POINTER_RECORD:
+			case RecordType::SHARED_POINTER_RECORD:
+			case RecordType::REFERENCE_POINTER_RECORD:
+			case RecordType::HOLD_POINTER_RECORD:
 				skipPointer(m_stream, m_settings->PointerFormat);
 				break;
 			case RecordType::BLOCK_DEFINITION:
@@ -341,10 +354,38 @@ namespace KDB::Binary
 		{
 			m_stream.read(&recordType, 1);
 			auto type = reinterpret_cast<unsigned char*>(&recordType);
-			if (RecordType::POINTER_RECORD != *type)
+			
+			//all pointer entries start with 0xA (0xA0, A1, ...) so we bitmask to find invalid records
+			if ((RecordType::OWNING_POINTER_RECORD & (*type)) != RecordType::OWNING_POINTER_RECORD)
 				throw std::runtime_error("Internal error: invalid record type " + std::to_string(*type) + " while scanning pointers.");
 
-			auto p = buildPointer(m_stream, m_settings->PointerFormat);
+			auto p = buildPointer(m_stream, m_settings->PointerFormat, (Contracts::PointerType)(*type));
+			if (p->getAddress() == address)
+				return p;
+		}
+
+		if (throwIfNoMatch)
+			throw std::runtime_error("Pointer " + std::to_string(address) + " has not been recognized.");
+		return nullptr;
+	}
+
+	std::unique_ptr<Contracts::IDBPointer> FileWriter::scanTempForPointer(unsigned long long address, bool throwIfNoMatch)
+	{
+		char recordType;
+		m_stream.seekg(0);
+
+		while ((recordType = m_stream.peek()) != EOF)
+		{
+			//all pointer entries start with 0xA (0xA0, A1, ...) so we bitmask to isolate valid records
+			if ((RecordType::OWNING_POINTER_RECORD & recordType) != RecordType::OWNING_POINTER_RECORD)
+			{
+				skipRecord();
+				continue;
+			}
+			else
+				m_stream.ignore(1);
+
+			auto p = buildPointer(m_stream, m_settings->PointerFormat, (Contracts::PointerType)(recordType));
 			if (p->getAddress() == address)
 				return p;
 		}

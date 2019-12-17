@@ -1,16 +1,16 @@
 RECORD WRITING
 - Modifica record
 - Eliminazione record
-	- Indirizzi (gestione owning/non-owning pointers)
-	- Tipi (cosa fare con i blocchi corrispondenti e i loro record?)
+	- Tipi (impedire eliminazione se ci sono oggetti, permetterla altrimenti)
 
 AVANZATE:
+- Mappa in memoria di puntatori e blocchi
 - #fulprt Gestione partizioni multiple
 - Ricerca record su condizioni sui campi
-- Mappa in memoria di puntatori e blocchi (Corretta nel BinaryWriter?)
 - #morrec Record remoti ed embedded
 
 MISC.
 - Unico GuidEmpty per performance
+- Valutare se esporre un contratto invece di Field su IDBType
 - Riordino eccezioni
 - Pulizia interfaccia Core

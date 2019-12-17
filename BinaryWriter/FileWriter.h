@@ -25,7 +25,7 @@ namespace KDB::Binary
 		void skipRecord();
 		bool writeRecordAtCurrPosition(const std::vector<char>& data, int spaceAfter);
 	public:
-		FileWriter(KDB::Primitives::ConfigSettings* settings, std::string_view filename);
+		FileWriter(KDB::Primitives::ConfigSettings* settings, std::string_view filename, bool isVolatile);
 		virtual ~FileWriter();
 
 		FileWriter(const FileWriter&) = delete;
@@ -51,5 +51,6 @@ namespace KDB::Binary
 		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(Guid typeId);
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockId(Guid blockId);
 		std::unique_ptr<Contracts::IDBPointer> scanForPointer(unsigned long long address, bool throwIfNoMatch);
+		std::unique_ptr<Contracts::IDBPointer> scanTempForPointer(unsigned long long address, bool throwIfNoMatch);
 	};
 }

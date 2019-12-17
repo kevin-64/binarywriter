@@ -39,6 +39,8 @@ void writeObj(Core&, const Type* type);
 void readObj(Core&);
 void removeObj(Core&);
 
+void testSharedPtr(Core&);
+
 int main()
 {
 	auto start = std::chrono::system_clock::now();
@@ -54,9 +56,10 @@ int main()
 	//writePtr(core);
 	//readPtr(core);
 	//readBlock(core);
-	writeObj(core, tydef);
+	//writeObj(core, tydef);
 	//readObj(core);
 	//removeObj(core);
+	testSharedPtr(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
@@ -176,4 +179,18 @@ void readObj(Core& core)
 	KDB::Primitives::Pointer ptr(fmt, 0xD091BB5C);
 	auto record = core.getRecord(ptr);
 	auto i = 0;
+}
+
+void testSharedPtr(Core& core)
+{
+	auto fmt = KDB::Primitives::PointerFormat{ 4, 4 };
+	KDB::Primitives::Pointer owningPtr(fmt, 0xD091BB5C);
+	auto shared = core.getShared(owningPtr);
+	
+	try {
+		core.deleteRecord(*shared.get());
+	}
+	catch (const std::runtime_error & err) {
+		std::cout << err.what() << std::endl;
+	}
 }
