@@ -1,4 +1,3 @@
-- Errore off by one nell'eliminazione di un record (FF finisce troppo presto)
 - Controllo nome duplicato di tipo
 
 RECORD WRITING

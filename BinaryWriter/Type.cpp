@@ -178,7 +178,7 @@ namespace KDB::Primitives
 			stream.ignore(1); //field index
 			stream.read(&nameSize, 1); //field name length
 			stream.ignore(nameSize + 1); //field name and field type identifier
-			totalSize += nameSize + 2;
+			totalSize += nameSize + 3;
 
 			totFields++;
 		}
