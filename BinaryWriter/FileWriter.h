@@ -48,7 +48,7 @@ namespace KDB::Binary
 		void allocatePartition(unsigned long long offset, unsigned long long size);
 
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockType(Guid typeId);
-		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(const std::string& typeName);
+		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(const std::string& typeName, bool throwIfNoMatch);
 		std::pair<unsigned long long, std::unique_ptr<Primitives::Type>> scanForTypeDefinition(const Guid& typeId);
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockId(Guid blockId);
 		std::unique_ptr<Contracts::IDBPointer> scanForPointer(unsigned long long address, bool throwIfNoMatch);

@@ -308,7 +308,7 @@ namespace KDB::Binary
 		throw std::runtime_error("No blocks have been allocated for type {" + id + "}");
 	}
 
-	std::unique_ptr<Contracts::IDBType> FileWriter::scanForTypeDefinition(const std::string& typeName)
+	std::unique_ptr<Contracts::IDBType> FileWriter::scanForTypeDefinition(const std::string& typeName, bool throwIfNoMatch)
 	{
 		char recordType;
 		m_stream.seekg(0);
@@ -325,7 +325,9 @@ namespace KDB::Binary
 				return t;
 		}
 
-		throw std::runtime_error("Type '" + typeName + "' has not been recognized.");
+		if (throwIfNoMatch)
+			throw std::runtime_error("Type '" + typeName + "' has not been recognized.");
+		return nullptr;
 	}
 
 	std::pair<unsigned long long, std::unique_ptr<Type>> FileWriter::scanForTypeDefinition(const Guid& typeId) 

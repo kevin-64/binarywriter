@@ -53,7 +53,7 @@ int main()
 	auto tydef = dynamic_cast<KDB::Primitives::Type*>(readDef(core).release());
 	//seekBlock(core, tydef->getTypeId());
 	//seekType(core, "MyType");
-	writeBlock(core, tydef->getTypeId());
+	//writeBlock(core, tydef->getTypeId());
 	//writePtr(core);
 	//readPtr(core);
 	//readBlock(core);

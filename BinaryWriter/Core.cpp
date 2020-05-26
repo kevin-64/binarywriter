@@ -127,6 +127,11 @@ namespace KDB::Binary
 
 	void Core::addType(const KDB::Contracts::IDBType& type) 
 	{
+		//check for name clash
+		const std::string newName = std::string(type.getName());
+		if (nullptr != m_typesFile->scanForTypeDefinition(newName, false))
+			throw new std::runtime_error("Type {" + newName + "} already exists.");
+
 		m_typesFile->writeRecordAfterLast(type);
 	}
 
@@ -338,6 +343,6 @@ namespace KDB::Binary
 
 	std::unique_ptr<KDB::Contracts::IDBType> Core::seekType(const std::string& typeName)
 	{
-		return m_typesFile->scanForTypeDefinition(typeName);
+		return m_typesFile->scanForTypeDefinition(typeName, true);
 	}
 }

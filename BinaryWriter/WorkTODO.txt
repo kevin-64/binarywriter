@@ -1,11 +1,6 @@
-- Controllo nome duplicato di tipo
-
 RECORD WRITING
-- Modifica record
-- Eliminazione record
-	- Tipi (impedire eliminazione se ci sono oggetti, permetterla altrimenti)
-		IN PROGRESS
 - Puntatori reference (impedire eliminazione record se ci sono reference ad esso)
+- Modifica record
 
 AVANZATE:
 - Mappa in memoria di puntatori e blocchi
