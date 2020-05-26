@@ -1,3 +1,7 @@
+//disabilitiamo gli warning per il troncamento e gli overflow
+#pragma warning( disable : 4305 4309)
+#pragma warning( disable: 26451)
+
 #include "Type.h"
 #include "Utilities.h"
 #include "shortcuts.h"
@@ -11,10 +15,6 @@ namespace KDB::Primitives
 		std::swap(lhs.m_name, rhs.m_name);
 		std::swap(lhs.m_fields, rhs.m_fields);
 		std::swap(lhs.m_typeId, rhs.m_typeId);
-	}
-
-	Type::Type()
-	{
 	}
 
 	Type::Type(string name, vector<Field>&& fields, Guid&& guid)
@@ -54,8 +54,6 @@ namespace KDB::Primitives
 	{
 		vector<char> data;
 
-//disabilitiamo gli warning per il troncamento
-#pragma warning( disable : 4305 4309)
 		data.push_back(RecordType::TYPE_DEFINITION);
 
 		auto serGuid = m_typeId.serialize();
@@ -98,14 +96,14 @@ namespace KDB::Primitives
 		return size;
 	}
 
-	const Guid& Type::getTypeId() const
-	{
-		return this->m_typeId;
-	}
-
 	std::string_view Type::getName() const
 	{
 		return this->m_name;
+	}
+
+	const Guid& Type::getTypeId() const
+	{
+		return this->m_typeId;
 	}
 
 	const KDB::Primitives::Field& Type::getField(int index) const
@@ -152,5 +150,47 @@ namespace KDB::Primitives
 	{
 		//type records are highly variable so it is more efficient to just read them in order to advance the stream position
 		buildType(stream);
+	}
+
+	bool deleteType(std::fstream& stream)
+	{
+		unsigned long long recordStart = stream.tellg();
+		recordStart--;
+
+		//skip the type id (the record type was already consumed by the caller)
+		stream.ignore(16);
+		auto totalSize = 1 + 16;
+
+		//get and skip the name size
+		char nameSize;
+		stream.read(&nameSize, 1);
+		stream.ignore(nameSize);
+		totalSize += nameSize + 1;
+
+		char totFields = 0;
+		char fieldIndex;
+		while ((fieldIndex = stream.peek()) != EOF)
+		{
+			//if we reach another entry or an empty record we are finished
+			if ((fieldIndex == DELETED_ENTRY) || (totFields > 0 && fieldIndex == TYPE_DEFINITION))
+				break;
+
+			stream.ignore(1); //field index
+			stream.read(&nameSize, 1); //field name length
+			stream.ignore(nameSize + 1); //field name and field type identifier
+			totalSize += nameSize + 2;
+
+			totFields++;
+		}
+
+		//we go back to the beginning for the overwrite
+		stream.seekp((unsigned long long)recordStart);
+
+		//we overwrite with empty space, indicating how much is available at the beginning (after the record type)
+		vector<char> emptySpace(totalSize, DELETED_ENTRY);
+		Utilities::writeover_int(emptySpace, 1, totalSize);
+		stream.write(emptySpace.data(), emptySpace.size());
+
+		return true;
 	}
 }

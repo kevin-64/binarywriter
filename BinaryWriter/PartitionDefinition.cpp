@@ -74,7 +74,7 @@ namespace KDB::Primitives
 	std::pair<int, unsigned long long> PartitionDefinition::getPartitionCoordinates() const
 	{
 		//TODO: #fulprt handle full partitions to avoid overwrites
-		return std::make_pair(this->m_fileId, this->m_ptrAdjOffset);
+		return std::make_pair(this->m_fileId - 1, this->m_ptrAdjOffset);
 	}
 
 	std::unique_ptr<PartitionDefinition> buildPartitionDefinition(std::fstream& stream)

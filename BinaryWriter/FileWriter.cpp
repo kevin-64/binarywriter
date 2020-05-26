@@ -137,11 +137,35 @@ namespace KDB::Binary
 		return currOffset;
 	}
 
-	std::unique_ptr<IDBRecord> FileWriter::readRecord(long long offset) {
+	bool FileWriter::anyRecords(unsigned long long startOffset, unsigned long long limit)
+	{
+		m_stream.seekg(startOffset);
+
+		int next;
+		while ((next = m_stream.peek()) != EOF)
+		{
+			//if we reach the end we are finished
+			if (m_stream.tellg() >= limit)
+				return false;
+
+			//if we find a record we are finished
+			if (next != RecordType::DELETED_ENTRY)
+				return true;
+
+			int spaceSize;
+			auto headerSize = 1 + sizeof(int);
+			m_stream.ignore(1); //ignore the empty record marker
+			Utilities::read_int(m_stream, &spaceSize);
+			m_stream.ignore(spaceSize - headerSize); //we already consumed 5 bytes for the record type and size
+		}
+		return false;
+	}
+	
+	std::unique_ptr<IDBRecord> FileWriter::readRecord(unsigned long long offset) {
 		return this->readRecord(offset, nullptr);
 	}
 
-	std::unique_ptr<IDBRecord> FileWriter::readRecord(long long offset, KDB::Primitives::Type* objectType)
+	std::unique_ptr<IDBRecord> FileWriter::readRecord(unsigned long long offset, KDB::Primitives::Type* objectType)
 	{
 		m_stream.seekg(offset);
 
@@ -171,7 +195,7 @@ namespace KDB::Binary
 		}
 	}
 
-	bool FileWriter::deleteRecord(long long offset)
+	bool FileWriter::deleteRecord(unsigned long long offset)
 	{
 		m_stream.seekg(offset);
 
@@ -183,8 +207,7 @@ namespace KDB::Binary
 		switch (*rType)
 		{
 		case RecordType::TYPE_DEFINITION:
-			//return deleteType(m_stream);
-			break;
+			return deleteType(m_stream);
 		case RecordType::CONFIG_RECORD:
 			//return deleteConfigEntry(m_stream);
 			break;
@@ -305,13 +328,14 @@ namespace KDB::Binary
 		throw std::runtime_error("Type '" + typeName + "' has not been recognized.");
 	}
 
-	std::unique_ptr<Contracts::IDBType> FileWriter::scanForTypeDefinition(Guid typeId) 
+	std::pair<unsigned long long, std::unique_ptr<Type>> FileWriter::scanForTypeDefinition(const Guid& typeId) 
 	{
 		char recordType;
 		m_stream.seekg(0);
 
 		while (EOF != m_stream.peek())
 		{
+			unsigned long long offset = m_stream.tellg();
 			m_stream.read(&recordType, 1);
 			auto type = reinterpret_cast<unsigned char*>(&recordType);
 			if (RecordType::TYPE_DEFINITION != *type)
@@ -319,7 +343,7 @@ namespace KDB::Binary
 
 			auto t = buildType(m_stream);
 			if (t->getTypeId() == typeId)
-				return t;
+				return std::make_pair(offset, std::move(t));
 		}
 
 		throw std::runtime_error("Type {" + typeId.toString() + "} has not been recognized.");

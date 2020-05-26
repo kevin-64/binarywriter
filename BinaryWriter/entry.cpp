@@ -22,6 +22,7 @@ using Core = KDB::Binary::Core;
 using namespace std::string_literals;
 
 void writeType(Core&);
+void deleteType(Core&);
 std::unique_ptr<KDB::Contracts::IDBRecord> readDef(Core&);
 
 void writeConf(Core&);
@@ -48,18 +49,19 @@ int main()
 	Core core(R"(C:\Users\kevin\Desktop\kdb_files.txt)");
 
 	//writeConf(core);
-	//writeType(core);
+	writeType(core);
 	auto tydef = dynamic_cast<KDB::Primitives::Type*>(readDef(core).release());
 	//seekBlock(core, tydef->getTypeId());
 	//seekType(core, "MyType");
-	//writeBlock(core, tydef->getTypeId());
+	writeBlock(core, tydef->getTypeId());
 	//writePtr(core);
 	//readPtr(core);
 	//readBlock(core);
 	//writeObj(core, tydef);
 	//readObj(core);
 	//removeObj(core);
-	testSharedPtr(core);
+	//testSharedPtr(core);
+	//deleteType(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << diff.count();
@@ -97,6 +99,12 @@ void writeType(Core& core)
 	auto type = Type(name, std::move(fields), std::move(typeId));
 
 	core.addType(type);
+}
+
+void deleteType(Core& core)
+{
+	auto t = core.seekType("MyType"s);
+	core.deleteType(t->getTypeId());
 }
 
 auto readDef(Core& core) -> decltype(core.getType(0))

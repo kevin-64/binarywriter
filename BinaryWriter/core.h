@@ -47,6 +47,7 @@ namespace KDB::Binary {
 
 		//temporanea; nella versione finale si leggono tutti i tipi e si interroga la lista
 		std::unique_ptr<KDB::Contracts::IDBRecord> getType(long long offset);
+		bool deleteType(const Guid& guid);
 
 		void addType(const KDB::Contracts::IDBType& type);
 
@@ -66,7 +67,7 @@ namespace KDB::Binary {
 		bool deleteRecord(const KDB::Contracts::IDBPointer& owningPtr);
 
 		//temporanea: nella versione finale il chiamante non ha necessità di conoscere il blocco
-		std::unique_ptr<KDB::Primitives::BlockDefinition> seekBlock(Guid typeId);
+		std::unique_ptr<KDB::Primitives::BlockDefinition> seekBlock(const Guid& typeId);
 
 		std::unique_ptr<KDB::Contracts::IDBType> seekType(const std::string& typeName);
 	};

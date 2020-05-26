@@ -17,7 +17,7 @@ namespace KDB::Primitives
 	class Type : public Contracts::IDBType
 	{
 	private:
-		Type();
+		Type() = default;
 		std::string m_name;
 		std::vector<Field> m_fields;
 		Guid m_typeId;
@@ -41,15 +41,16 @@ namespace KDB::Primitives
 		virtual int getSize() const override;
 
 		virtual std::string_view getName() const override;
+		virtual const Guid& getTypeId() const override;
 		virtual const KDB::Primitives::Field& getField(int) const override;
 		const char getFieldCount() const;
 
-		const Guid& getTypeId() const;
-
 		friend std::unique_ptr<Type> buildType(std::fstream& stream);
 		friend void skipType(std::fstream& stream);
+		friend bool deleteType(std::fstream& stream);
 	};
 
 	std::unique_ptr<Type> buildType(std::fstream& stream);
 	void skipType(std::fstream& stream);
+	bool deleteType(std::fstream& stream);
 }

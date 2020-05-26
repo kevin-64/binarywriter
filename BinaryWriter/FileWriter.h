@@ -39,16 +39,17 @@ namespace KDB::Binary
 		bool writeRecordAfterLast(const Contracts::IDBRecord& record);
 		unsigned long long writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit);
 
-		std::unique_ptr<Contracts::IDBRecord> readRecord(long long offset);
-		std::unique_ptr<Contracts::IDBRecord> readRecord(long long offset, KDB::Primitives::Type* objectType);
+		bool anyRecords(unsigned long long startOffset, unsigned long long limit);
+		std::unique_ptr<Contracts::IDBRecord> readRecord(unsigned long long offset);
+		std::unique_ptr<Contracts::IDBRecord> readRecord(unsigned long long offset, KDB::Primitives::Type* objectType);
 
-		bool deleteRecord(long long offset);
+		bool deleteRecord(unsigned long long offset);
 
 		void allocatePartition(unsigned long long offset, unsigned long long size);
 
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockType(Guid typeId);
 		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(const std::string& typeName);
-		std::unique_ptr<Contracts::IDBType> scanForTypeDefinition(Guid typeId);
+		std::pair<unsigned long long, std::unique_ptr<Primitives::Type>> scanForTypeDefinition(const Guid& typeId);
 		std::unique_ptr<Primitives::BlockDefinition> scanForBlockId(Guid blockId);
 		std::unique_ptr<Contracts::IDBPointer> scanForPointer(unsigned long long address, bool throwIfNoMatch);
 		std::unique_ptr<Contracts::IDBPointer> scanTempForPointer(unsigned long long address, bool throwIfNoMatch);

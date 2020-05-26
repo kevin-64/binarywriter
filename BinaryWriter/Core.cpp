@@ -130,6 +130,24 @@ namespace KDB::Binary
 		m_typesFile->writeRecordAfterLast(type);
 	}
 
+	bool Core::deleteType(const Guid& guid)
+	{
+		auto block = seekBlock(guid);
+		//TODO #fulprt: gestire le altre partizioni; tutte devono essere vuote per poter eliminare il tipo
+		auto partInfo = block->getPartitionForWrite();
+		auto partFileAndAdj = partInfo.second->getPartitionCoordinates();
+		auto partSize = partInfo.second->getPartitionSize();
+		auto offset = partInfo.first + partFileAndAdj.second;
+
+		if (m_storageFiles.at(partFileAndAdj.first).anyRecords(offset, offset + partSize))
+			throw std::runtime_error("Cannot delete type {" + guid.toString() + "} as there are records for it.");
+
+		unsigned long long deletePos;
+		std::tie(deletePos, std::ignore) = m_typesFile->scanForTypeDefinition(guid);
+		m_typesFile->deleteRecord(deletePos);
+		return true;
+	}
+
 	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getConfigEntry(long long offset)
 	{
 		return m_configFile->readRecord(offset);
@@ -166,8 +184,8 @@ namespace KDB::Binary
 		auto block = upBlock.get();
 		auto fileAndOffset = block->getOffsetForRecord(startOffset);
 
-		auto type = m_typesFile->scanForTypeDefinition(block->getTypeId());
-		auto realType = dynamic_cast<KDB::Primitives::Type*>(type.release());
+		auto offsetAndType = m_typesFile->scanForTypeDefinition(block->getTypeId());
+		auto realType = dynamic_cast<KDB::Primitives::Type*>(offsetAndType.second.release());
 
 		return std::make_pair(fileAndOffset, realType);
 	}
@@ -178,7 +196,7 @@ namespace KDB::Binary
 		auto recInfo = findRecord(ptr, isOwner);
 		auto fileAndOffset = recInfo.first;
 		auto type = recInfo.second;
-		return m_storageFiles.at(fileAndOffset.first - 1).readRecord(fileAndOffset.second, type);
+		return m_storageFiles.at(fileAndOffset.first).readRecord(fileAndOffset.second, type);
 	}
 
 	std::unique_ptr<KDB::Contracts::IDBPointer> Core::getShared(const KDB::Contracts::IDBPointer& owningPtr)
@@ -229,7 +247,7 @@ namespace KDB::Binary
 		auto offset = part.first + coord.second;
 
 		auto limit = offset + size - 1;
-		auto writeOffset = m_storageFiles.at(coord.first - 1).writeRecordAfterOffset(object, offset, limit);
+		auto writeOffset = m_storageFiles.at(coord.first).writeRecordAfterOffset(object, offset, limit);
 		
 		//the owning pointer is generated for the new record, to be stored in the pointer table
 		auto address = createAddress();
@@ -247,7 +265,7 @@ namespace KDB::Binary
 		if (!isOwner)
 			throw std::runtime_error("Cannot delete record through non-owning pointer.");
 
-		return m_storageFiles.at(fileAndOffset.first - 1).deleteRecord(fileAndOffset.second);
+		return m_storageFiles.at(fileAndOffset.first).deleteRecord(fileAndOffset.second);
 	}
 
 	void Core::addPointer(const KDB::Primitives::Pointer& ptr)
@@ -269,8 +287,8 @@ namespace KDB::Binary
 		auto size = (blockOffsetAndPartition.second)->getPartitionSize();
 		auto offset = blockOffsetAndPartition.first + fileAndAdjustment.second;
 		
-		//the partition needs to be allocated before use; the file ID is 1-based so it needs to be reduced
-		m_storageFiles.at(fileAndAdjustment.first - 1).allocatePartition(offset, size);
+		//the partition needs to be allocated before use
+		m_storageFiles.at(fileAndAdjustment.first).allocatePartition(offset, size);
 
 		m_blocksFile->writeRecordAfterLast(block);
 	}
@@ -313,7 +331,7 @@ namespace KDB::Binary
 		m_tempFile->writeRecordAfterLast(record);
 	}
 
-	std::unique_ptr<KDB::Primitives::BlockDefinition> Core::seekBlock(Guid typeId)
+	std::unique_ptr<KDB::Primitives::BlockDefinition> Core::seekBlock(const Guid& typeId)
 	{
 		return m_blocksFile->scanForBlockType(typeId);
 	}
