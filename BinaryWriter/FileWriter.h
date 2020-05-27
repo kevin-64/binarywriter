@@ -4,6 +4,7 @@
 #include "ConfigSettings.h"
 #include "RecordType.h"
 #include "BlockDefinition.h"
+#include "Pointer.h"
 #include "Type.h"
 #include "IDBType.h"
 #include "IDBPointer.h"
@@ -40,8 +41,9 @@ namespace KDB::Binary
 		unsigned long long writeRecordAfterOffset(const Contracts::IDBRecord& record, unsigned long long offset, unsigned long long limit);
 
 		bool anyRecords(unsigned long long startOffset, unsigned long long limit);
+		bool anyReferences(const KDB::Primitives::Pointer& ptr);
 		std::unique_ptr<Contracts::IDBRecord> readRecord(unsigned long long offset);
-		std::unique_ptr<Contracts::IDBRecord> readRecord(unsigned long long offset, KDB::Primitives::Type* objectType);
+		std::unique_ptr<Contracts::IDBRecord> readRecord(unsigned long long offset, const KDB::Primitives::Type* objectType);
 
 		bool deleteRecord(unsigned long long offset);
 

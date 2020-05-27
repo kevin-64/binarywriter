@@ -19,12 +19,6 @@ namespace KDB::Primitives
 		m_size = getSize();
 	}
 
-	Object::~Object()
-	{
-		if (m_type != nullptr)
-			delete m_type;
-	}
-
 	Object::Object(Object&& other) noexcept
 		: Object::Object()
 	{
@@ -150,7 +144,7 @@ namespace KDB::Primitives
 		return 0; //the size can only be dynamically determined by getData() and is not known here
 	}
 
-	std::unique_ptr<Object> buildObject(std::fstream& stream, KDB::Primitives::Type* type)
+	std::unique_ptr<Object> buildObject(std::fstream& stream, const KDB::Primitives::Type* type)
 	{
 		std::map<int, void*> fieldData;
 
@@ -244,9 +238,10 @@ namespace KDB::Primitives
 		auto pos = stream.tellg();
 		stream.seekp((unsigned long long)pos - headerSize); //we go back to before the header
 
-		auto fullSize = headerSize + recordSize;
-		std::vector<char> data(fullSize, DELETED_ENTRY);
-		stream.write(data.data(), fullSize);
+		stream.put(DELETED_ENTRY);
+		stream.ignore(sizeof(int));
+		std::vector<char> data(recordSize, DELETED_ENTRY);
+		stream.write(data.data(), recordSize);
 
 		return true;
 	}

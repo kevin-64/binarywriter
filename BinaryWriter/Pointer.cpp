@@ -118,6 +118,11 @@ namespace KDB::Primitives
 		return m_complete;
 	}
 
+	bool Pointer::samePoint(const Pointer& other) const
+	{
+		return getBlockId() == other.getBlockId() && getOffset() == other.getOffset();
+	}
+
 	std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& format, Contracts::PointerType ptrType)
 	{
 		unsigned long long address;

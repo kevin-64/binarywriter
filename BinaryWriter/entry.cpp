@@ -41,6 +41,7 @@ void readObj(Core&);
 void removeObj(Core&);
 
 void testSharedPtr(Core&);
+void testRefPtr(Core&);
 
 int main()
 {
@@ -49,7 +50,7 @@ int main()
 	Core core(R"(C:\Users\kevin\Desktop\kdb_files.txt)");
 
 	//writeConf(core);
-	writeType(core);
+	//writeType(core);
 	auto tydef = dynamic_cast<KDB::Primitives::Type*>(readDef(core).release());
 	//seekBlock(core, tydef->getTypeId());
 	//seekType(core, "MyType");
@@ -61,6 +62,7 @@ int main()
 	//readObj(core);
 	//removeObj(core);
 	//testSharedPtr(core);
+	testRefPtr(core);
 	//deleteType(core);
 	auto end = std::chrono::system_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -195,10 +197,34 @@ void testSharedPtr(Core& core)
 	KDB::Primitives::Pointer owningPtr(fmt, 0xD091BB5C);
 	auto shared = core.getShared(owningPtr);
 	
+	//deletion should fail
 	try {
 		core.deleteRecord(*shared.get());
 	}
 	catch (const std::runtime_error & err) {
+		std::cout << err.what() << std::endl;
+	}
+}
+
+void testRefPtr(Core& core)
+{
+	auto fmt = KDB::Primitives::PointerFormat{ 4, 4 };
+	KDB::Primitives::Pointer owningPtr(fmt, 0xD091BB5C);
+	auto ref = core.getReference(owningPtr);
+
+	//deletion should fail
+	try {
+		core.deleteRecord(*ref.get());
+	}
+	catch (const std::runtime_error& err) {
+		std::cout << err.what() << std::endl;
+	}
+
+	//deletion should fail even through the owning pointer now
+	try {
+		core.deleteRecord(owningPtr);
+	}
+	catch (const std::runtime_error& err) {
 		std::cout << err.what() << std::endl;
 	}
 }

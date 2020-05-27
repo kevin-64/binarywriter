@@ -9,6 +9,7 @@
 #include "PointerFormat.h"
 #include "BlockDefinition.h"
 #include "Object.h"
+#include "guid.h"
 #include <string>
 #include <vector>
 #include <random>
@@ -33,7 +34,8 @@ namespace KDB::Binary {
 
 		void readConfiguration();
 		unsigned long long createAddress();
-		std::pair<std::pair<int, unsigned long long>, KDB::Primitives::Type*> findRecord(const KDB::Contracts::IDBPointer& ptr, bool& isOwner);
+		std::tuple<int, unsigned long long, KDB::Primitives::Type*> findRecord(const KDB::Contracts::IDBPointer& ptr, bool& isOwner);
+		std::tuple<Guid, unsigned long long, bool> resolveNonVolatilePointer(const KDB::Contracts::IDBPointer& ptr);
 		void addTemp(const KDB::Contracts::IDBRecord& record);
 	public:
 		Core(const std::string& definitionFilePath);
@@ -56,6 +58,7 @@ namespace KDB::Binary {
 
 		std::unique_ptr<KDB::Contracts::IDBRecord> getRecord(const KDB::Contracts::IDBPointer& ptr);
 		std::unique_ptr<KDB::Contracts::IDBPointer> getShared(const KDB::Contracts::IDBPointer& owningPtr);
+		std::unique_ptr<KDB::Contracts::IDBPointer> getReference(const KDB::Contracts::IDBPointer& owningPtr);
 
 		std::unique_ptr<KDB::Contracts::IDBRecord> getPointer(long long offset);
 		void addPointer(const KDB::Primitives::Pointer& ptr);

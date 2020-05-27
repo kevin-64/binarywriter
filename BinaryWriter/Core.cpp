@@ -163,7 +163,7 @@ namespace KDB::Binary
 		m_configFile->writeRecordAfterLast(entry);
 	}
 
-	std::pair<std::pair<int, unsigned long long>, KDB::Primitives::Type*> Core::findRecord(const KDB::Contracts::IDBPointer& ptr,
+	std::tuple<int, unsigned long long, KDB::Primitives::Type*> Core::findRecord(const KDB::Contracts::IDBPointer& ptr,
 																						   bool& isOwner)
 	{
 		auto realPtr = dynamic_cast<const KDB::Primitives::Pointer*>(&ptr);
@@ -192,25 +192,23 @@ namespace KDB::Binary
 		auto offsetAndType = m_typesFile->scanForTypeDefinition(block->getTypeId());
 		auto realType = dynamic_cast<KDB::Primitives::Type*>(offsetAndType.second.release());
 
-		return std::make_pair(fileAndOffset, realType);
+		return std::make_tuple(fileAndOffset.first, fileAndOffset.second, realType);
 	}
 
 	std::unique_ptr<KDB::Contracts::IDBRecord> Core::getRecord(const KDB::Contracts::IDBPointer& ptr)
 	{
 		bool isOwner;
 		auto recInfo = findRecord(ptr, isOwner);
-		auto fileAndOffset = recInfo.first;
-		auto type = recInfo.second;
-		return m_storageFiles.at(fileAndOffset.first).readRecord(fileAndOffset.second, type);
+		return m_storageFiles.at(std::get<0>(recInfo)).readRecord(std::get<1>(recInfo), std::get<2>(recInfo));
 	}
 
-	std::unique_ptr<KDB::Contracts::IDBPointer> Core::getShared(const KDB::Contracts::IDBPointer& owningPtr)
+	std::tuple<Guid, unsigned long long, bool> Core::resolveNonVolatilePointer(const KDB::Contracts::IDBPointer& ptr)
 	{
 		Guid blockId;
 		unsigned long long offset;
 		bool isOwner;
-		
-		auto realPtr = dynamic_cast<const Primitives::Pointer*>(&owningPtr);
+
+		auto realPtr = dynamic_cast<const Primitives::Pointer*>(&ptr);
 
 		if (realPtr->isComplete())
 		{
@@ -228,6 +226,16 @@ namespace KDB::Binary
 			isOwner = (realCompletePtr->getPointerType() == Contracts::PointerType::Owning);
 		}
 
+		return std::make_tuple(blockId, offset, isOwner);
+	}
+
+	std::unique_ptr<KDB::Contracts::IDBPointer> Core::getShared(const KDB::Contracts::IDBPointer& owningPtr)
+	{
+		Guid blockId;
+		unsigned long long offset;
+		bool isOwner;
+		std::tie(blockId, offset, isOwner) = resolveNonVolatilePointer(owningPtr);
+
 		if (!isOwner)
 			throw std::runtime_error("Cannot obtain shared pointer through non-owning pointer.");
 		
@@ -237,6 +245,25 @@ namespace KDB::Binary
 		
 		//shared pointers are volatile by default unless explicitly persisted
 		addTemp(ptr);
+		return std::make_unique<KDB::Primitives::Pointer>(std::move(ptr));
+	}
+
+	std::unique_ptr<KDB::Contracts::IDBPointer> Core::getReference(const KDB::Contracts::IDBPointer& owningPtr)
+	{
+		Guid blockId;
+		unsigned long long offset;
+		bool isOwner;
+		std::tie(blockId, offset, isOwner) = resolveNonVolatilePointer(owningPtr);
+
+		if (!isOwner)
+			throw std::runtime_error("Cannot obtain reference pointer through non-owning pointer.");
+
+		//a new reference pointer is generated for the new record
+		auto address = createAddress();
+		auto ptr = KDB::Primitives::Pointer(m_settings.PointerFormat, address, blockId, offset, Contracts::PointerType::Reference);
+		
+		//reference pointers are stored persistently
+		addPointer(ptr);
 		return std::make_unique<KDB::Primitives::Pointer>(std::move(ptr));
 	}
 
@@ -264,13 +291,23 @@ namespace KDB::Binary
 
 	bool Core::deleteRecord(const KDB::Contracts::IDBPointer& owningPtr)
 	{
+		Guid blockId;
+		unsigned long long offset;
 		bool isOwner;
-		auto fileAndOffset = findRecord(owningPtr, isOwner).first;
+		std::tie(blockId, offset, isOwner) = resolveNonVolatilePointer(owningPtr);
 
 		if (!isOwner)
 			throw std::runtime_error("Cannot delete record through non-owning pointer.");
 
-		return m_storageFiles.at(fileAndOffset.first).deleteRecord(fileAndOffset.second);
+		//a full pointer object is built to avoid having to resolve it again in the findRecord function
+		auto fullPtr = KDB::Primitives::Pointer(m_settings.PointerFormat, owningPtr.getAddress(), blockId, offset,
+												Contracts::PointerType::Owning);
+
+		if (m_ptrFile->anyReferences(fullPtr))
+			throw std::runtime_error("The object cannot deleted because at least one reference exists to it.");
+
+		auto recInfo = findRecord(fullPtr, isOwner);
+		return m_storageFiles.at(std::get<0>(recInfo)).deleteRecord(std::get<1>(recInfo));
 	}
 
 	void Core::addPointer(const KDB::Primitives::Pointer& ptr)

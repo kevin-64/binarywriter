@@ -46,6 +46,7 @@ namespace KDB::Primitives
 		Guid getBlockId() const;
 		unsigned long long getOffset() const;
 		bool isComplete() const;
+		bool samePoint(const Pointer& other) const;
 
 		friend std::unique_ptr<Pointer> buildPointer(std::fstream& stream, const PointerFormat& ptrFormat, Contracts::PointerType ptrType);
 		friend void skipPointer(std::fstream& stream, const PointerFormat& format);

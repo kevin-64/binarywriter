@@ -1,6 +1,5 @@
 RECORD WRITING
-- Puntatori reference (impedire eliminazione record se ci sono reference ad esso)
-- Modifica record
+- Modifica record e puntatori hold
 
 AVANZATE:
 - Mappa in memoria di puntatori e blocchi
@@ -10,6 +9,8 @@ AVANZATE:
 
 MISC.
 - Unico GuidEmpty per performance
+- Verificare qualità seed rng (sembra che il primo indirizzo sia sempre identico)
 - Valutare se esporre un contratto invece di Field su IDBType
+- Valutare se è necessario proteggersi da corruzione malicious del tipo di puntatore 
 - Riordino eccezioni
 - Pulizia interfaccia Core

@@ -165,7 +165,7 @@ namespace KDB::Binary
 		return this->readRecord(offset, nullptr);
 	}
 
-	std::unique_ptr<IDBRecord> FileWriter::readRecord(unsigned long long offset, KDB::Primitives::Type* objectType)
+	std::unique_ptr<IDBRecord> FileWriter::readRecord(unsigned long long offset, const KDB::Primitives::Type* objectType)
 	{
 		m_stream.seekg(offset);
 
@@ -393,6 +393,30 @@ namespace KDB::Binary
 		if (throwIfNoMatch)
 			throw std::runtime_error("Pointer " + std::to_string(address) + " has not been recognized.");
 		return nullptr;
+	}
+
+	bool FileWriter::anyReferences(const KDB::Primitives::Pointer& ptr)
+	{
+		char recordType;
+		m_stream.seekg(0);
+
+		while (EOF != m_stream.peek())
+		{
+			m_stream.read(&recordType, 1);
+			auto recType = reinterpret_cast<unsigned char*>(&recordType);
+
+			//we are only interested in reference pointers
+			if (RecordType::REFERENCE_POINTER_RECORD == *recType)
+			{
+				auto ref = buildPointer(m_stream, m_settings->PointerFormat, (Contracts::PointerType)(*recType));
+				if (ref->samePoint(ptr))
+					return true;
+			}
+				
+			skipPointer(m_stream, m_settings->PointerFormat);
+		}
+
+		return false;
 	}
 
 	std::unique_ptr<Contracts::IDBPointer> FileWriter::scanTempForPointer(unsigned long long address, bool throwIfNoMatch)
