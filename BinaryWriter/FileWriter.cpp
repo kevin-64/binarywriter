@@ -191,7 +191,7 @@ namespace KDB::Binary
 				return buildPartitionDefinition(m_stream);
 			case RecordType::MAIN_RECORD:
 				return buildObject(m_stream, objectType);
-			//TODO: altri tipi di record
+			//TODO: other record types
 		}
 	}
 
@@ -225,7 +225,7 @@ namespace KDB::Binary
 			break;
 		case RecordType::MAIN_RECORD:
 			return deleteObject(m_stream);
-			//TODO: altri tipi di record
+			//TODO: other record types
 		}
 
 	}
@@ -265,7 +265,7 @@ namespace KDB::Binary
 			case RecordType::MAIN_RECORD:
 				skipObject(m_stream);
 				break;
-			//TODO: altri tipi di record
+			//TODO: other 
 		}
 	}
 

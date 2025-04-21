@@ -64,7 +64,7 @@ namespace KDB::Primitives
 
 		auto serGuid = m_blockId.serialize();
 
-//disabilitiamo gli warning per il troncamento
+//disable truncation warnings
 #pragma warning( disable : 4305 4309)
 		data.push_back((unsigned char)(this->m_ptrType));
 		

@@ -62,7 +62,7 @@ namespace KDB::Primitives
 	std::vector<char> ConfigEntry::getData() const
 	{
 		vector<char> data;
-//disabilitiamo gli warning per il troncamento
+//disable truncation warnings
 #pragma warning( disable : 4305 4309)
 		data.push_back(RecordType::CONFIG_RECORD);
 

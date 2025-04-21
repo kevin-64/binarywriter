@@ -80,7 +80,7 @@ namespace KDB::Primitives
 		int prefixSize = 1 + sizeof(int); //record ID + size of the size itself
 		int size = prefixSize;
 
-//disabilitiamo gli warning per il troncamento
+//disable truncation warnings
 #pragma warning( disable : 4305 4309)
 		data.push_back(RecordType::MAIN_RECORD);
 
@@ -209,7 +209,7 @@ namespace KDB::Primitives
 			}
 			else if (marker == TYPE_ENTRY_MARKER)
 			{
-				//TODO - forse non serve nemmeno...
+				//TODO - might not be needed
 			}
 		}
 

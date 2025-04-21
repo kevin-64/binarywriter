@@ -1,4 +1,4 @@
-//disabilitiamo gli warning per il troncamento e gli overflow
+//disable truncation and overflow warnings
 #pragma warning( disable : 4305 4309)
 #pragma warning( disable: 26451)
 
