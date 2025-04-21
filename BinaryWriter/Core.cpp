@@ -138,7 +138,7 @@ namespace KDB::Binary
 	bool Core::deleteType(const Guid& guid)
 	{
 		auto block = seekBlock(guid);
-		//TODO #fulprt: gestire le altre partizioni; tutte devono essere vuote per poter eliminare il tipo
+		//TODO #fulprt: handle other partitions; deleting a type requires all of them to be empty
 		auto partInfo = block->getPartitionForWrite();
 		auto partFileAndAdj = partInfo.second->getPartitionCoordinates();
 		auto partSize = partInfo.second->getPartitionSize();

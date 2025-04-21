@@ -1,4 +1,4 @@
-//problemi di overflow tra int e size_t
+//disable overflow warning for conversions between int and size_t
 #pragma warning( disable : 26451)
 
 #include "FileWriter.h"

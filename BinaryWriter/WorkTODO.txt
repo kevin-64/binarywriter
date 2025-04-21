@@ -1,16 +1,16 @@
 RECORD WRITING
-- Modifica record e puntatori hold
+- Edit record, hold pointers
 
 AVANZATE:
-- Mappa in memoria di puntatori e blocchi
-- #fulprt Gestione partizioni multiple
-- Ricerca record su condizioni sui campi
-- #morrec Record remoti ed embedded
+- In-memory pointer map, block map
+- #fulprt Multiple partitions management
+- Find record by condition on fields
+- #morrec Remote, embedded records
 
 MISC.
-- Unico GuidEmpty per performance
-- Verificare qualità seed rng (sembra che il primo indirizzo sia sempre identico)
-- Valutare se esporre un contratto invece di Field su IDBType
-- Valutare se è necessario proteggersi da corruzione malicious del tipo di puntatore 
-- Riordino eccezioni
-- Pulizia interfaccia Core
+- Singleton GuidEmpty for performance
+- Check RNG seed quality (seems to always start at same address - might be a "dev" build issue)
+- Instead of exposing IDBType.Field, consider using a contract
+- Consider implementing protection from malicious corruption of pointer type
+- Exceptions cleanup
+- Core interface cleanup
